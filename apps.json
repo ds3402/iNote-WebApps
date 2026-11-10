@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-11-10T13:18:40.528Z",
+  "count": 8,
+  "apps": [
+    {
+      "id": "torque-web-converter-v3-html",
+      "title": "유압 토크렌치 변환기",
+      "description": "유압 토크렌치의 토크와 작동 압력을 빠르게 변환합니다.",
+      "category": "Torque",
+      "icon": "🔧",
+      "keywords": "토크렌치, 유압, 압력, 토크, 변환",
+      "url": "App/torque_web_converter_v3.html",
+      "file": "torque_web_converter_v3.html"
+    },
+    {
+      "id": "torque-web-calculator-v2-html",
+      "title": "토크렌치 연장바 계산기",
+      "description": "연장바 길이와 설정값을 이용해 실제 체결 토크를 계산합니다.",
+      "category": "Torque",
+      "icon": "📏",
+      "keywords": "토크렌치, 연장바, 체결 토크, 계산",
+      "url": "App/torque_web_calculator_v2.html",
+      "file": "torque_web_calculator_v2.html"
+    },
+    {
+      "id": "resin-calculator-web-v2-html",
+      "title": "레진 수량 계산기",
+      "description": "필요한 레진의 사용량과 제작 가능 수량을 계산합니다.",
+      "category": "Engineering",
+      "icon": "🧩",
+      "keywords": "레진, 수량, 사용량, 계산",
+      "url": "App/resin_calculator_web_v2.html",
+      "file": "resin_calculator_web_v2.html"
+    },
+    {
+      "id": "hex-bolt-calculator-web-v2-html",
+      "title": "볼트 길이 계산기",
+      "description": "체결 조건과 규격을 바탕으로 필요한 육각볼트 길이를 계산합니다.",
+      "category": "Engineering",
+      "icon": "🔩",
+      "keywords": "볼트, 육각볼트, 길이, 규격, 계산",
+      "url": "App/hex_bolt_calculator_web_v2.html",
+      "file": "hex_bolt_calculator_web_v2.html"
+    },
+    {
+      "id": "triangle-solver-v3-html",
+      "title": "삼각형 계산기",
+      "description": "변과 각을 이용해 삼각형의 길이, 각도, 둘레와 넓이를 계산합니다.",
+      "category": "Engineering",
+      "icon": "📐",
+      "keywords": "삼각형, 삼각함수, 변, 각도, 넓이",
+      "url": "App/triangle_solver_v3.html",
+      "file": "triangle_solver_v3.html"
+    },
+    {
+      "id": "packcovercalc-html",
+      "title": "포장재 커버 사이즈 계산기",
+      "description": "포장 대상의 치수를 바탕으로 포장재 커버 사이즈를 산출합니다.",
+      "category": "Engineering",
+      "icon": "📦",
+      "keywords": "포장재, 커버, 사이즈, 치수",
+      "url": "App/PackCoverCalc.html",
+      "file": "PackCoverCalc.html"
+    },
+    {
+      "id": "unit-coverter-v3-html",
+      "title": "단위 변환기",
+      "description": "길이, 무게, 각도 등 다양한 단위를 간편하게 변환합니다.",
+      "category": "Utility",
+      "icon": "🧮",
+      "keywords": "단위, 변환, 길이, 무게, 각도",
+      "url": "App/unit_coverter_v3.html",
+      "file": "unit_coverter_v3.html"
+    },
+    {
+      "id": "text-converter-html",
+      "title": "텍스트 줄바꿈 정리 도구",
+      "description": "텍스트의 불필요한 줄바꿈과 문단을 정리합니다. PC 사용을 권장합니다.",
+      "category": "Utility",
+      "icon": "📝",
+      "keywords": "텍스트, 줄바꿈, 문단, 정리",
+      "url": "App/text_converter.html",
+      "file": "text_converter.html"
+    }
+  ]
+}

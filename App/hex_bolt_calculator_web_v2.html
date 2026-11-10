@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>볼트 길이 계산기 (iOS 라이트 스타일)</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg-color: #f5f6f7;
+    --card-bg: #ffffff;
+    --text-color: #111418;
+    --subtle-text: #6b7280;
+    --accent-color: #007aff;
+    --input-bg: #ffffff;
+    --input-border: #e5e7eb;
+    --input-focus: rgba(0,122,255,0.35);
+    --shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
+    --radius-xl: 16px;
+    --radius-lg: 12px;
+    --radius-md: 10px;
+    --gap: 1rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; padding: 16px;
+    background: var(--bg-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+    color: var(--text-color);
+    max-width: 520px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.5;
+  }
+  h1 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.45rem; /* 타이틀 폰트 조금 축소 */
+    letter-spacing: -0.01em;
+    margin: 8px 0 4px;
+  }
+  .author {
+    text-align: center;
+    font-size: 12px;
+    color: var(--subtle-text);
+    user-select: none;
+    margin-bottom: 14px;
+  }
+  form {
+    background: var(--card-bg);
+    padding: 16px 14px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    border: 1px solid #eef0f2;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap);
+  }
+  @media (min-width: 360px) {
+    form { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 640px) {
+    form { grid-template-columns: repeat(3, 1fr); }
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+  }
+  select, input[type=number] {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border-radius: var(--radius-lg);
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    font-size: 15px;
+    appearance: none;
+    transition: box-shadow .2s ease, border-color .2s ease, transform .02s ease-in-out;
+  }
+  select:focus, input[type=number]:focus {
+    outline: none;
+    border-color: #c7d7fe;
+    box-shadow: 0 0 0 4px var(--input-focus);
+  }
+  select:hover, input[type=number]:hover {
+    border-color: #d1d5db;
+  }
+  button {
+    grid-column: 1 / -1;
+    height: 48px;
+    padding: 0 16px;
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 14px;
+    border: 0;
+    background: var(--accent-color);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(0,122,255,0.25);
+    transition: filter .2s ease, transform .06s ease;
+  }
+  button:hover { filter: brightness(1.05); }
+  button:active { transform: translateY(1px); }
+
+  #spannerInfo, #result {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+  #spannerInfo {
+    font-size: 14px;
+    color: #2563eb;
+    background: #f0f7ff;
+    border: 1px solid #e0efff;
+    padding: 8px 10px;
+    border-radius: var(--radius-md);
+  }
+  #result {
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  #calculationDetails {
+    grid-column: 1 / -1;
+    text-align: left;
+    margin-top: 2px;
+    font-size: 13px;
+    color: #374151;
+    white-space: pre-line;
+    background-color: #fafafa;
+    padding: 12px 12px;
+    border-radius: var(--radius-lg);
+    user-select: text;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    border: 1px dashed #e5e7eb;
+  }
+</style>
+
+    <meta name="inote:title" content="볼트 길이 계산기">
+    <meta name="inote:description" content="체결 조건과 규격을 바탕으로 필요한 육각볼트 길이를 계산합니다.">
+    <meta name="inote:category" content="Engineering">
+    <meta name="inote:icon" content="🔩">
+    <meta name="inote:keywords" content="볼트, 육각볼트, 길이, 규격, 계산">
+    <meta name="inote:publish" content="true">
+</head>
+<body>
+<h1>🔩 Bolt Length Calculator v2</h1>
+<div class="author">주식회사 유현</div>
+<form id="boltForm" onsubmit="event.preventDefault(); calculateLength();">
+  <div>
+    <label for="boltSize">볼트 사이즈</label>
+    <select id="boltSize" required></select>
+  </div>
+  <div>
+    <label for="nutType">너트 종류</label>
+    <select id="nutType" required>
+      <option value="nut">일반 너트</option>
+      <option value="selfLockNut">셀프락 너트</option>
+    </select>
+  </div>
+  <div>
+    <label for="nutCount">너트 개수</label>
+    <input type="number" id="nutCount" value="1" min="0" step="1" required />
+  </div>
+  <div>
+    <label for="flatWasherCount">평와셔 개수</label>
+    <input type="number" id="flatWasherCount" value="1" min="0" step="1" required />
+  </div>
+  <div>
+    <label for="springWasherCount">스프링와셔 개수</label>
+    <input type="number" id="springWasherCount" value="1" min="0" step="1" required />
+  </div>
+  <div>
+    <label for="sheetThickness">시트 두께 (mm)</label>
+    <input type="number" id="sheetThickness" value="10" min="0" step="0.1" required />
+  </div>
+  <div>
+    <label for="padThickness">패드 두께 (mm)</label>
+    <input type="number" id="padThickness" value="5" min="0" step="0.1" required />
+  </div>
+  <div>
+    <label for="resinThickness">레진 두께 (mm)</label>
+    <input type="number" id="resinThickness" value="2" min="0" step="0.1" required />
+  </div>
+  <div>
+    <label for="extraLength">여유 길이 (mm)</label>
+    <input type="number" id="extraLength" value="2" min="0" step="0.1" required />
+  </div>
+  <button type="submit">계산하기</button>
+
+  <div id="spannerInfo"></div>
+  <div id="result"></div>
+  <div id="calculationDetails"></div>
+</form>
+<script>
+  // === 표준화된 볼트/부품 두께 데이터 ===
+  // 일반 너트: ISO 4032 최대 높이(보수적 길이 산정, M6~M64); M72 이상은 기존 확장값
+  // 셀프락 너트: ISO 7040:2025 h_max (M6~M39), 그 이상은 확장값
+  // 평와셔: ISO 7089 계열 두께; M72 이상은 확장값
+  // 스프링와셔: DIN 127 계열 두께 (ISO 국제표준 아님)
+  const partThickness = {
+    "M6": { nut: 5.2, selfLockNut: 8.0, flatWasher: 1.6, springWasher: 1.6 },
+    "M8": { nut: 6.8, selfLockNut: 9.5, flatWasher: 1.6, springWasher: 2.0 },
+    "M10": { nut: 8.4, selfLockNut: 11.9, flatWasher: 2.0, springWasher: 2.2 },
+    "M12": { nut: 10.8, selfLockNut: 14.9, flatWasher: 2.5, springWasher: 2.5 },
+    "M14": { nut: 12.8, selfLockNut: 17.0, flatWasher: 2.5, springWasher: 3.0 },
+    "M16": { nut: 14.8, selfLockNut: 19.1, flatWasher: 3.0, springWasher: 3.5 },
+    "M18": { nut: 15.8, selfLockNut: 21.2, flatWasher: 3.0, springWasher: 3.5 },
+    "M20": { nut: 18.0, selfLockNut: 23.0, flatWasher: 3.0, springWasher: 4.0 },
+    "M22": { nut: 19.4, selfLockNut: 25.0, flatWasher: 3.0, springWasher: 4.0 },
+    "M24": { nut: 21.5, selfLockNut: 27.1, flatWasher: 4.0, springWasher: 5.0 },
+    "M27": { nut: 23.8, selfLockNut: 29.9, flatWasher: 4.0, springWasher: 5.0 },
+    "M30": { nut: 25.6, selfLockNut: 32.6, flatWasher: 4.0, springWasher: 6.0 },
+    "M33": { nut: 28.7, selfLockNut: 35.7, flatWasher: 5.0, springWasher: 6.0 },
+    "M36": { nut: 31.0, selfLockNut: 38.9, flatWasher: 5.0, springWasher: 6.0 },
+    "M39": { nut: 33.4, selfLockNut: 41.9, flatWasher: 6.0, springWasher: 6.0 },
+    "M42": { nut: 34.0, selfLockNut: 44.2, flatWasher: 7.0, springWasher: 7.0 },
+    "M45": { nut: 36.0, selfLockNut: 46.8, flatWasher: 7.0, springWasher: 7.0 },
+    "M48": { nut: 38.0, selfLockNut: 49.4, flatWasher: 8.0, springWasher: 7.0 },
+    "M52": { nut: 42.0, selfLockNut: 54.6, flatWasher: 8.0, springWasher: 8.0 },
+    "M56": { nut: 45.0, selfLockNut: 58.5, flatWasher: 9.0, springWasher: 8.0 },
+    "M64": { nut: 51.0, selfLockNut: 66.3, flatWasher: 9.0, springWasher: 8.0 },
+    "M72": { nut: 58, selfLockNut: 75.4, flatWasher: 10.0, springWasher: 11 },
+    "M80": { nut: 64, selfLockNut: 83.2, flatWasher: 12.0, springWasher: 12 },
+    "M90": { nut: 72, selfLockNut: 93.6, flatWasher: 12.0, springWasher: 13 },
+    "M100": { nut: 80, selfLockNut: 104.0, flatWasher: 14.0, springWasher: 14 }
+  };
+
+  // === 스패너 사이즈 ===
+  // M6~M64: current ISO series; M72 이상: 확장값
+  const spannerSize = {
+    "M6": 10,
+    "M8": 13,
+    "M10": 16,
+    "M12": 18,
+    "M14": 21,
+    "M16": 24,
+    "M18": 27,
+    "M20": 30,
+    "M22": 34,
+    "M24": 36,
+    "M27": 41,
+    "M30": 46,
+    "M33": 50,
+    "M36": 55,
+    "M39": 60,
+    "M42": 65,
+    "M45": 70,
+    "M48": 75,
+    "M52": 80,
+    "M56": 85,
+    "M64": 95,
+    "M72": 105,
+    "M80": 115,
+    "M90": 125,
+    "M100": 135
+  };
+
+  // === 피치 (Metric coarse thread, ISO 계열) ===
+  const boltPitch = {
+    "M6": 1.0, "M8": 1.25, "M10": 1.5, "M12": 1.75, "M14": 2.0, "M16": 2.0,
+    "M18": 2.5, "M20": 2.5, "M22": 2.5, "M24": 3.0, "M27": 3.0, "M30": 3.5,
+    "M33": 3.5, "M36": 4.0, "M39": 4.0, "M42": 4.5, "M45": 4.5, "M48": 5.0,
+    "M52": 5.0, "M56": 5.5, "M64": 6.0, "M72": 6.0, "M80": 6.0,
+    "M90": 6.0, "M100": 6.0
+  };
+
+  const lock_iso = {"M6": 8.0, "M8": 9.5, "M10": 11.9, "M12": 14.9, "M14": 17.0, "M16": 19.1, "M18": 21.2, "M20": 23.0, "M22": 25.0, "M24": 27.1, "M27": 29.9, "M30": 32.6, "M33": 35.7, "M36": 38.9, "M39": 41.9};
+  const spring_din = {"M6": 1.6, "M8": 2.0, "M10": 2.2, "M12": 2.5, "M14": 3.0, "M16": 3.5, "M18": 3.5, "M20": 4.0, "M22": 4.0, "M24": 5.0, "M27": 5.0, "M30": 6.0, "M33": 6.0, "M36": 6.0, "M39": 6.0, "M42": 7.0, "M45": 7.0, "M48": 7.0, "M52": 8.0, "M56": 8.0, "M60": 8.0, "M64": 8.0};
+
+  const boltSelect = document.getElementById("boltSize");
+  const spannerInfoDiv = document.getElementById("spannerInfo");
+  const resultDiv = document.getElementById("result");
+  const calcDetailsDiv = document.getElementById("calculationDetails");
+
+  // 드롭다운 옵션 채우기
+  function fillBoltOptions() {
+    if (!boltSelect) return;
+    boltSelect.innerHTML = "";
+    Object.keys(partThickness).forEach(size => {
+      const opt = document.createElement("option");
+      opt.value = size;
+      opt.textContent = size;
+      boltSelect.appendChild(opt);
+    });
+  }
+
+  // 볼트 변경 시 스패너/여유길이 갱신
+  function updateExtraAndSpanner() {
+    const selected = boltSelect.value;
+    if (!selected) return;
+
+    const pitch = boltPitch[selected];
+    const extra = Math.round(pitch * 1.5);
+    document.getElementById("extraLength").value = extra;
+
+    const lockStandard = lock_iso.hasOwnProperty(selected)
+      ? "ISO 7040:2025"
+      : "확장 데이터";
+
+    const springStandard = spring_din.hasOwnProperty(selected)
+      ? "DIN 127"
+      : "확장 데이터";
+
+    const standardNote = selected === "M72" || selected === "M80" ||
+                         selected === "M90" || selected === "M100"
+      ? " · 일부 부품 치수는 확장 데이터"
+      : "";
+
+    spannerInfoDiv.textContent =
+      `🔧 스패너: ${spannerSize[selected]} mm · 너트: ISO 4032 · 평와셔: ISO 7089 · 셀프락: ${lockStandard} · 스프링: ${springStandard}${standardNote}`;
+  }
+
+  // 변경 이벤트 핸들러 연결
+  if (boltSelect) {
+    boltSelect.addEventListener("change", updateExtraAndSpanner);
+  }
+
+  // 초기화
+  window.addEventListener("DOMContentLoaded", () => {
+    fillBoltOptions();
+    boltSelect.value = "M30";
+    updateExtraAndSpanner();
+  });
+
+  // 계산 함수
+  function calculateLength() {
+    const size = boltSelect.value;
+    const nutType = document.getElementById("nutType").value;
+
+    const nutCount = Number(document.getElementById("nutCount").value);
+    const flatWasherCount = Number(document.getElementById("flatWasherCount").value);
+    const springWasherCount = Number(document.getElementById("springWasherCount").value);
+    const sheetThickness = Number(document.getElementById("sheetThickness").value);
+    const padThickness = Number(document.getElementById("padThickness").value);
+    const resinThickness = Number(document.getElementById("resinThickness").value);
+    const extraLength = Number(document.getElementById("extraLength").value);
+
+    const values = [
+      ["너트 개수", nutCount],
+      ["평와셔 개수", flatWasherCount],
+      ["스프링와셔 개수", springWasherCount],
+      ["시트 두께", sheetThickness],
+      ["패드 두께", padThickness],
+      ["레진 두께", resinThickness],
+      ["여유 길이", extraLength]
+    ];
+
+    // 빈 값, 숫자가 아닌 값, 음수 입력 방지
+    const invalid = values.find(([, value]) => !Number.isFinite(value) || value < 0);
+
+    // 개수 항목은 정수만 허용
+    const countValues = [
+      ["너트 개수", nutCount],
+      ["평와셔 개수", flatWasherCount],
+      ["스프링와셔 개수", springWasherCount]
+    ];
+    const invalidCount = countValues.find(([, value]) => !Number.isInteger(value));
+
+    if (invalid || invalidCount) {
+      const message = invalid
+        ? `${invalid[0]}을(를) 0 이상의 숫자로 입력해주세요.`
+        : `${invalidCount[0]}은(는) 정수로 입력해주세요.`;
+
+      resultDiv.textContent = "입력값을 확인해주세요.";
+      calcDetailsDiv.textContent = message;
+      return;
+    }
+
+    const nutT = partThickness[size][nutType] * nutCount;
+    const flatT = partThickness[size].flatWasher * flatWasherCount;
+    const springT = partThickness[size].springWasher * springWasherCount;
+
+    const totalLength =
+      nutT +
+      flatT +
+      springT +
+      sheetThickness +
+      padThickness +
+      resinThickness +
+      extraLength;
+
+    // 5mm 단위 올림
+    const rounded = Math.ceil(totalLength / 5) * 5;
+
+    resultDiv.textContent = `권장 볼트 길이: ${rounded} mm`;
+
+    const details = `
+볼트: ${size}
+기준: 육각볼트/스패너 ISO 4014 계열 · 일반너트 ISO 4032 · 평와셔 ISO 7089 · 셀프락 ISO 7040:2025(M6~M39) · 스프링와셔 DIN 127
+너트(${nutType}): ${nutCount}개 × ${partThickness[size][nutType]}mm = ${nutT.toFixed(2)}mm
+평와셔: ${flatWasherCount}개 × ${partThickness[size].flatWasher}mm = ${flatT.toFixed(2)}mm
+스프링와셔: ${springWasherCount}개 × ${partThickness[size].springWasher}mm = ${springT.toFixed(2)}mm
+시트두께: ${sheetThickness}mm
+패드두께: ${padThickness}mm
+레진 두께: ${resinThickness}mm
+여유길이: ${extraLength}mm
+
+총합계 (반올림 전): ${totalLength.toFixed(2)}mm
+5mm 단위 올림: ${rounded}mm
+    `.trim();
+
+    calcDetailsDiv.textContent = details;
+  }
+</script>

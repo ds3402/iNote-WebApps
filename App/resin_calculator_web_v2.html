@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resin Volume Calculator v2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
+            --focus: rgba(37, 99, 235, 0.14);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 18px 30px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: transparent;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .title-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 3px;
+            letter-spacing: -0.3px;
+        }
+
+        .company-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .close-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #e9eef5;
+            color: var(--text);
+        }
+
+        .section {
+            margin-bottom: 22px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            letter-spacing: -0.2px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .input-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: var(--surface);
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            padding: 10px 11px;
+            border-radius: 7px;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-field:hover {
+            border-color: #94a3b8;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--focus);
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.18);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            box-shadow: 0 2px 6px rgba(22, 163, 74, 0.18);
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #fecaca;
+            color: var(--danger-hover);
+        }
+
+        .btn-secondary {
+            background-color: #eef2f7;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+
+        .model-list {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        .list-header {
+            background-color: #f1f5f9;
+            display: grid;
+            grid-template-columns: 80px 80px 80px 60px 90px 40px;
+            padding: 10px 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .list-item {
+            display: grid;
+            grid-template-columns: 80px 80px 80px 60px 90px 40px;
+            padding: 10px 8px;
+            border-bottom: 1px solid #edf1f5;
+            align-items: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: #334155;
+            transition: background-color 0.15s;
+        }
+
+        .list-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .list-item.selected {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            color: #b91c1c;
+            background-color: #fee2e2;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border);
+            margin: 14px 0 18px;
+        }
+
+        .results {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 8px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        .result-item {
+            flex: 1;
+            text-align: center;
+            padding: 9px 5px;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .result-resin,
+        .result-cans {
+            color: var(--primary);
+        }
+
+        .result-remain {
+            color: var(--success);
+        }
+
+        .highlight {
+            color: #0f766e !important;
+            transition: color 0.5s;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px 18px;
+            }
+
+            .input-row {
+                gap: 4px;
+            }
+
+            .input-group {
+                min-width: 50px;
+            }
+
+            .input-field {
+                padding: 7px 4px;
+                font-size: 11px;
+                min-width: 0;
+            }
+
+            .btn {
+                padding: 7px 7px;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+
+            .preset-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .results {
+                gap: 5px;
+            }
+
+            .list-header, .list-item {
+                grid-template-columns: 60px 60px 60px 40px 70px 25px;
+                font-size: 9px;
+                padding: 6px 3px;
+            }
+
+            .main-title {
+                font-size: 22px;
+            }
+
+            .company-name {
+                font-size: 12px;
+            }
+
+            .section-title {
+                font-size: 15px;
+            }
+
+            .result-value {
+                font-size: 14px;
+            }
+
+            .result-label {
+                font-size: 11px;
+            }
+
+            .input-label {
+                font-size: 11px;
+                margin-bottom: 2px;
+            }
+        }
+    </style>
+
+    <meta name="inote:title" content="레진 수량 계산기">
+    <meta name="inote:description" content="필요한 레진의 사용량과 제작 가능 수량을 계산합니다.">
+    <meta name="inote:category" content="Engineering">
+    <meta name="inote:icon" content="🧩">
+    <meta name="inote:keywords" content="레진, 수량, 사용량, 계산">
+    <meta name="inote:publish" content="true">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="title-section">
+                <div class="main-title">Resin Volume Calculator v2</div>
+                <div class="company-name">주식회사 유현</div>
+            </div>
+            <button class="close-btn" onclick="window.close()">✕</button>
+        </div>
+
+        <!-- 모델 추가 섹션 -->
+        <div class="section">
+            <div class="section-title">Area 추가</div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">가로 (mm)</label>
+                    <input type="number" class="input-field" id="inputWidth" placeholder="가로">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">세로 (mm)</label>
+                    <input type="number" class="input-field" id="inputLength" placeholder="세로">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">높이 (mm)</label>
+                    <input type="number" class="input-field" id="inputHeight" placeholder="높이">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">개수</label>
+                    <input type="number" class="input-field" id="inputCount" value="1" placeholder="개수">
+                </div>
+                <button class="btn btn-success" onclick="addModel()">추가</button>
+            </div>
+        </div>
+
+        <!-- 모델 목록 -->
+        <div class="section">
+            <div class="section-title">Area별 목록</div>
+            <div class="model-list">
+                <div class="list-header">
+                    <div>가로(mm)</div>
+                    <div>세로(mm)</div>
+                    <div>높이(mm)</div>
+                    <div>개수</div>
+                    <div>부피(ml)</div>
+                    <div></div>
+                </div>
+                <div id="modelListContainer"></div>
+            </div>
+            <div class="button-row">
+                <button class="btn btn-danger" onclick="deleteSelectedModel()">선택 삭제</button>
+                <button class="btn btn-secondary" onclick="clearAllModels()">전체 삭제</button>
+            </div>
+        </div>
+
+        <!-- 레진 제품 선택 -->
+        <div class="section">
+            <div class="input-label">레진 제품 선택</div>
+            <div class="preset-buttons">
+                <button class="btn btn-secondary" onclick="setBottleSize(3800)">DURASIN (3,800ml)</button>
+                <button class="btn btn-secondary" onclick="setBottleSize(4000)">CHOCKFAST ORANGE (4,000ml)</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">직접입력 (ml)</label>
+                <input type="number" class="input-field" id="inputBottleSize" value="3800">
+            </div>
+        </div>
+
+        <!-- 계산 버튼 -->
+        <button class="btn btn-primary calculate-btn" onclick="calculateTotalResin()">전체 계산</button>
+
+        <!-- 구분선 -->
+        <div class="divider"></div>
+
+        <!-- 결과 섹션 -->
+        <div class="section">
+            <div class="section-title">계산 결과</div>
+            <div class="results">
+                <div class="result-item">
+                    <div class="result-label">총 필요 레진량</div>
+                    <div class="result-value result-resin" id="totalResin">0 ml</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">필요한 캔 수</div>
+                    <div class="result-value result-cans" id="totalCans">0 개</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">남는 레진량</div>
+                    <div class="result-value result-remain" id="remainResin">0 ml</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let modelList = [];
+        let selectedIndex = -1;
+
+        // 숫자 포맷팅 함수 (1000단위 쉼표 추가)
+        function formatNumber(number) {
+            return Math.round(number).toLocaleString('ko-KR');
+        }
+
+        // 쉼표가 포함된 문자열을 숫자로 변환
+        function parseFormattedNumber(str) {
+            return parseFloat(str.toString().replace(/,/g, '')) || 0;
+        }
+
+        // 레진 캔 용량 설정
+        function setBottleSize(size) {
+            document.getElementById('inputBottleSize').value = size;
+        }
+
+        // 모델 추가 함수
+        function addModel() {
+            const width = parseFloat(document.getElementById('inputWidth').value);
+            const length = parseFloat(document.getElementById('inputLength').value);
+            const height = parseFloat(document.getElementById('inputHeight').value);
+            const count = parseFloat(document.getElementById('inputCount').value);
+
+            // 입력값 검증
+            if (!width || !length || !height || !count || width <= 0 || length <= 0 || height <= 0 || count <= 0) {
+                alert('모든 값을 올바르게 입력해주세요!');
+                return;
+            }
+
+            // 개별 부피 계산 (mm³를 ml로 변환)
+            const volumePerPiece = (width * length * height) / 1000;
+            const totalVolume = volumePerPiece * count;
+
+            // 모델 추가
+            const model = {
+                width: width,
+                length: length,
+                height: height,
+                count: count,
+                volume: totalVolume
+            };
+
+            modelList.push(model);
+            updateModelList();
+
+            // 입력 필드 초기화
+            document.getElementById('inputWidth').value = '';
+            document.getElementById('inputLength').value = '';
+            document.getElementById('inputHeight').value = '';
+            document.getElementById('inputCount').value = '1';
+
+            // 포커스를 가로 입력창으로
+            document.getElementById('inputWidth').focus();
+        }
+
+        // 모델 목록 업데이트
+        function updateModelList() {
+            const container = document.getElementById('modelListContainer');
+            container.innerHTML = '';
+
+            modelList.forEach((model, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                if (index === selectedIndex) {
+                    item.classList.add('selected');
+                }
+                
+                item.innerHTML = `
+                    <div>${formatNumber(model.width)}</div>
+                    <div>${formatNumber(model.length)}</div>
+                    <div>${formatNumber(model.height)}</div>
+                    <div>${formatNumber(model.count)}</div>
+                    <div>${formatNumber(model.volume)}</div>
+                    <button class="delete-btn" onclick="deleteModel(${index})" title="삭제">×</button>
+                `;
+                
+                item.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('delete-btn')) {
+                        selectModel(index);
+                    }
+                });
+                
+                container.appendChild(item);
+            });
+        }
+
+        // 모델 선택
+        function selectModel(index) {
+            selectedIndex = selectedIndex === index ? -1 : index;
+            updateModelList();
+        }
+
+        // 개별 모델 삭제
+        function deleteModel(index) {
+            modelList.splice(index, 1);
+            if (selectedIndex === index) {
+                selectedIndex = -1;
+            } else if (selectedIndex > index) {
+                selectedIndex--;
+            }
+            updateModelList();
+        }
+
+        // 선택된 모델 삭제
+        function deleteSelectedModel() {
+            if (selectedIndex >= 0) {
+                deleteModel(selectedIndex);
+            } else {
+                alert('삭제할 모델을 선택해주세요!');
+            }
+        }
+
+        // 전체 모델 삭제
+        function clearAllModels() {
+            modelList = [];
+            selectedIndex = -1;
+            updateModelList();
+            
+            // 결과 초기화
+            document.getElementById('totalResin').textContent = '0 ml';
+            document.getElementById('totalCans').textContent = '0 개';
+            document.getElementById('remainResin').textContent = '0 ml';
+        }
+
+        // 전체 레진 계산
+        function calculateTotalResin() {
+            if (modelList.length === 0) {
+                alert('계산할 모델을 추가해주세요!');
+                return;
+            }
+
+            const bottleSize = parseFormattedNumber(document.getElementById('inputBottleSize').value);
+            if (bottleSize <= 0) {
+                alert('레진 캔 용량을 올바르게 입력해주세요!');
+                return;
+            }
+
+            // 총 부피 계산
+            let totalVolume = 0;
+            modelList.forEach(model => {
+                totalVolume += model.volume;
+            });
+
+            // 여유분 0% 추가
+            const totalWithMargin = totalVolume * 1;
+
+            // 필요한 캔 수 계산
+            const cansNeeded = Math.ceil(totalWithMargin / bottleSize);
+
+            // 남는 레진량 계산
+            const remainResin = (cansNeeded * bottleSize) - totalWithMargin;
+
+            // 결과 표시
+            document.getElementById('totalResin').textContent = formatNumber(totalVolume) + ' ml';
+            document.getElementById('totalCans').textContent = formatNumber(cansNeeded) + ' 개';
+            document.getElementById('remainResin').textContent = formatNumber(remainResin) + ' ml';
+
+            // 시각적 피드백
+            const elements = ['totalResin', 'totalCans', 'remainResin'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                element.classList.add('highlight');
+                setTimeout(() => {
+                    element.classList.remove('highlight');
+                }, 500);
+            });
+        }
+
+        // 엔터 키 입력 처리
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const focusedElement = document.activeElement;
+                if (focusedElement.classList.contains('input-field')) {
+                    addModel();
+                }
+            }
+        });
+
+        // 초기 포커스 설정
+        window.addEventListener('load', function() {
+            document.getElementById('inputWidth').focus();
+        });
+    </script>
+</body>
+</html>
