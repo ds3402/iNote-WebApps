@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f8fc">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="iNote Apps">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <script>
     (() => {
       try {
@@ -70,7 +75,9 @@
     :root[data-theme="dark"] .tag{background:#263c58;color:#a9cfff}
     :root[data-theme="dark"] .empty{background:#1b2638;border-color:#40516a;color:var(--muted)}
     :root[data-theme="dark"] footer{color:#77879d}
-    .top-actions{display:flex;align-items:center;gap:12px}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .header-action{height:40px;padding:0 11px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;font:inherit;font-size:12px;font-weight:700}
+    .header-action:hover{border-color:#91b9e6}
     .theme-toggle{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink);display:grid;place-items:center;cursor:pointer;font-size:18px;transition:.15s}
     .theme-toggle:hover{border-color:#91b9e6;transform:translateY(-1px)}
     .release-badge{font-size:9px;font-weight:800;letter-spacing:.3px;padding:4px 6px;border-radius:5px;line-height:1}
@@ -79,6 +86,15 @@
     :root[data-theme="dark"] .release-badge.new{background:#173d2b;color:#75dfa0}
     :root[data-theme="dark"] .release-badge.update{background:#49331c;color:#ffc477}
     .card-title-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .grid.list-view{display:flex;flex-direction:column;gap:8px}
+    .grid.list-view .card{min-height:0;padding:12px 15px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:13px;align-items:center}
+    .grid.list-view .card-top{grid-column:1;grid-row:1 / span 2}
+    .grid.list-view .card-title-row{grid-column:2;grid-row:1;align-self:end}
+    .grid.list-view .card h3{margin:0;font-size:13px}
+    .grid.list-view .card p{grid-column:2;grid-row:2;align-self:start;margin-top:3px}
+    .grid.list-view .card-bottom{grid-column:3;grid-row:1 / span 2;margin:0;padding:0;gap:12px}
+    .grid.list-view .launch{display:none}
+    :root[data-theme="dark"] .header-action{background:#202d40;border-color:#3a4b63;color:#e7edf7}
     @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-note{display:none}}
     @media(max-width:520px){.shell{width:min(100% - 26px,1120px)}.topbar{height:66px}.brand{font-size:18px}.brand-mark{width:38px;height:38px}.hero{padding:23px 19px;border-radius:18px;margin-top:10px}.hero p{font-size:12px}.grid{gap:9px}.card{padding:14px;min-height:145px}.card h3{font-size:13px}.card p{font-size:11px}.app-icon{width:38px;height:38px;font-size:20px}}
     @media(max-width:350px){.grid{grid-template-columns:1fr}}
@@ -93,6 +109,8 @@
       </a>
       <div class="top-actions">
         <span class="top-note">PERSONAL WEB APPLICATIONS</span>
+        <button class="header-action" id="viewToggle" type="button" aria-label="리스트 보기" title="보기 방식 변경">☷ <span>리스트</span></button>
+        <button class="header-action" id="installButton" type="button" hidden>＋ <span>설치</span></button>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 변경" title="테마 변경">🌙</button>
       </div>
     </header>
@@ -114,7 +132,8 @@
     <footer>© iNote Web Apps · Built for everyday work</footer>
   </div>
   <script>
-    const state = { apps: [], category: "전체", query: "" };
+    const state = { apps: [], category: "전체", query: "", view: "card" };
+    try { state.view = localStorage.getItem("inote-view") === "list" ? "list" : "card"; } catch (_) {}
     const $ = (selector) => document.querySelector(selector);
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
     function getReleaseBadge(app) {
@@ -140,6 +159,44 @@
       try { localStorage.setItem("inote-theme", next); } catch (_) {}
       applyTheme(next);
     });
+    const viewToggle = $("#viewToggle");
+    function applyView(view) {
+      state.view = view;
+      $("#apps").classList.toggle("list-view", view === "list");
+      viewToggle.innerHTML = view === "card" ? "☷ <span>리스트</span>" : "▦ <span>카드</span>";
+      viewToggle.setAttribute("aria-label", view === "card" ? "리스트 보기" : "카드 보기");
+      viewToggle.title = view === "card" ? "리스트 보기" : "카드 보기";
+      try { localStorage.setItem("inote-view", view); } catch (_) {}
+    }
+    viewToggle.addEventListener("click", () => applyView(state.view === "card" ? "list" : "card"));
+    applyView(state.view);
+
+    let installPrompt = null;
+    const installButton = $("#installButton");
+    window.addEventListener("beforeinstallprompt", event => {
+      event.preventDefault();
+      installPrompt = event;
+      installButton.hidden = false;
+    });
+    installButton.addEventListener("click", async () => {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt = null;
+      installButton.hidden = true;
+    });
+    window.addEventListener("appinstalled", () => {
+      installButton.hidden = true;
+      installPrompt = null;
+    });
+
+    // PWA service worker: enables installability and offline app-shell access.
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("PWA 등록 실패:", error));
+      });
+    }
+
     function renderFilters() {
       const categories = ["전체", ...new Set(state.apps.map(app => app.category))];
       $("#filters").innerHTML = categories.map(category =>
