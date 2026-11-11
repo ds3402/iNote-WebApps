@@ -1,4 +1,4 @@
-const CACHE_NAME = "inote-webapps-v1.2.0";
+const CACHE_NAME = "inote-webapps-v1.2.1";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -27,7 +27,11 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.startsWith("inote-webapps-") && key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(
+      keys
+        .filter(key => key.startsWith("inote-webapps-") && key !== CACHE_NAME)
+        .map(key => caches.delete(key))
+    );
     await self.clients.claim();
   })());
 });
@@ -35,25 +39,56 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
+
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // HTML pages and app shell: serve cached copy first for reliable offline access.
-  if (request.mode === "navigate" || PRECACHE_URLS.some(path => new URL(path, self.location.href).pathname === url.pathname)) {
+  // Navigation: always try the network first so each app opens from the latest
+  // deployed file. Use the cached copy only when the device is offline.
+  if (request.mode === "navigate") {
     event.respondWith((async () => {
-      const cached = await caches.match(request, { ignoreSearch: true });
-      if (cached) return cached;
       try {
         const response = await fetch(request);
-        if (response.ok) {
+        if (response && response.ok) {
           const cache = await caches.open(CACHE_NAME);
-          cache.put(request, response.clone());
+          const cacheKey = new Request(url.origin + url.pathname);
+          await cache.put(cacheKey, response.clone());
         }
         return response;
       } catch (_) {
-        const fallback = await caches.match("./index.html");
-        return fallback || new Response("오프라인 상태입니다.", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+        const cached = await caches.match(request, { ignoreSearch: true });
+        if (cached) return cached;
+        const home = await caches.match("./index.html");
+        return home || new Response("오프라인 상태입니다.", {
+          status: 503,
+          headers: { "Content-Type": "text/plain; charset=utf-8" }
+        });
       }
     })());
+    return;
   }
+
+  // Pre-cached static resources: cache first, then refresh from the network.
+  const isPrecached = PRECACHE_URLS.some(path =>
+    new URL(path, self.location.href).pathname === url.pathname
+  );
+  if (!isPrecached) return;
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (response && response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (_) {
+      return new Response("오프라인 상태입니다.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8" }
+      });
+    }
+  })());
 });
