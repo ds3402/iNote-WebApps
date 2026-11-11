@@ -4,6 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f8fc">
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("inote-theme");
+        document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
+      } catch (_) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
   <meta name="description" content="iNote Web Apps - 유용한 웹 도구를 한곳에서">
   <title>iNote Web Apps</title>
   <style>
@@ -45,6 +55,30 @@
     .open-label{font-size:11px;color:var(--blue);font-weight:700}
     .empty{display:none;text-align:center;padding:48px 15px;background:#fff;border:1px dashed #cfdae7;border-radius:15px;color:var(--muted);font-size:13px}
     footer{padding:35px 0 28px;text-align:center;color:#9aa8b8;font-size:11px}
+    :root[data-theme="dark"]{--ink:#e7edf7;--muted:#9eacc0;--line:#34445b;--bg:#111827;--white:#1b2638}
+    :root[data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+    :root[data-theme="dark"] .hero{background:linear-gradient(120deg,#1c304a,#1b2638 75%);border-color:#344b68}
+    :root[data-theme="dark"] .hero p{color:#a8b7ca}
+    :root[data-theme="dark"] #search{background:#202d40;border-color:#3a4b63;color:#edf3fb;box-shadow:none}
+    :root[data-theme="dark"] #search::placeholder{color:#91a0b4}
+    :root[data-theme="dark"] .filter{background:#202d40;border-color:#3a4b63;color:#c1ccda}
+    :root[data-theme="dark"] .filter.active{background:var(--blue);border-color:var(--blue);color:#fff}
+    :root[data-theme="dark"] .card{background:#1b2638;border-color:#34445b}
+    :root[data-theme="dark"] .card:hover{border-color:#5278a6;box-shadow:0 10px 24px #0005}
+    :root[data-theme="dark"] .app-icon{background:#263c58}
+    :root[data-theme="dark"] .launch{background:#29374b;color:#b5c3d5}
+    :root[data-theme="dark"] .tag{background:#263c58;color:#a9cfff}
+    :root[data-theme="dark"] .empty{background:#1b2638;border-color:#40516a;color:var(--muted)}
+    :root[data-theme="dark"] footer{color:#77879d}
+    .top-actions{display:flex;align-items:center;gap:12px}
+    .theme-toggle{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--ink);display:grid;place-items:center;cursor:pointer;font-size:18px;transition:.15s}
+    .theme-toggle:hover{border-color:#91b9e6;transform:translateY(-1px)}
+    .release-badge{font-size:9px;font-weight:800;letter-spacing:.3px;padding:4px 6px;border-radius:5px;line-height:1}
+    .release-badge.new{background:#e7f8ed;color:#168044}
+    .release-badge.update{background:#fff2df;color:#a85a00}
+    :root[data-theme="dark"] .release-badge.new{background:#173d2b;color:#75dfa0}
+    :root[data-theme="dark"] .release-badge.update{background:#49331c;color:#ffc477}
+    .card-title-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
     @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-note{display:none}}
     @media(max-width:520px){.shell{width:min(100% - 26px,1120px)}.topbar{height:66px}.brand{font-size:18px}.brand-mark{width:38px;height:38px}.hero{padding:23px 19px;border-radius:18px;margin-top:10px}.hero p{font-size:12px}.grid{gap:9px}.card{padding:14px;min-height:145px}.card h3{font-size:13px}.card p{font-size:11px}.app-icon{width:38px;height:38px;font-size:20px}}
     @media(max-width:350px){.grid{grid-template-columns:1fr}}
@@ -57,7 +91,10 @@
         <span class="brand-mark">iN</span>
         <span>iNote Web Apps<small>Useful Tools, All in One Place</small></span>
       </a>
-      <span class="top-note">PERSONAL WEB APPLICATIONS</span>
+      <div class="top-actions">
+        <span class="top-note">PERSONAL WEB APPLICATIONS</span>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크 모드로 변경" title="테마 변경">🌙</button>
+      </div>
     </header>
     <main>
       <section class="hero">
@@ -80,6 +117,29 @@
     const state = { apps: [], category: "전체", query: "" };
     const $ = (selector) => document.querySelector(selector);
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+    function getReleaseBadge(app) {
+      const badge = String(app.badge || "").toLowerCase();
+      const until = app.badgeUntil ? new Date(app.badgeUntil + "T23:59:59") : null;
+      const valid = (badge === "new" || badge === "update") && until && !Number.isNaN(until.getTime()) && until >= new Date();
+      if (!valid) return "";
+      const label = badge === "new" ? "NEW" : "UPDATE";
+      return `<span class="release-badge ${badge}">${label}</span>`;
+    }
+    const themeToggle = $("#themeToggle");
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      const dark = theme === "dark";
+      themeToggle.textContent = dark ? "☀️" : "🌙";
+      themeToggle.setAttribute("aria-label", dark ? "라이트 모드로 변경" : "다크 모드로 변경");
+      themeToggle.title = dark ? "라이트 모드" : "다크 모드";
+      document.querySelector('meta[name="theme-color"]').content = dark ? "#111827" : "#f5f8fc";
+    }
+    applyTheme(document.documentElement.dataset.theme || "light");
+    themeToggle.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      try { localStorage.setItem("inote-theme", next); } catch (_) {}
+      applyTheme(next);
+    });
     function renderFilters() {
       const categories = ["전체", ...new Set(state.apps.map(app => app.category))];
       $("#filters").innerHTML = categories.map(category =>
@@ -96,7 +156,7 @@
       $("#apps").innerHTML = filtered.map(app => `
         <a class="card" href="${escapeHtml(app.url)}">
           <div class="card-top"><span class="app-icon">${escapeHtml(app.icon)}</span><span class="launch" aria-hidden="true">↗</span></div>
-          <h3>${escapeHtml(app.title)}</h3>
+          <div class="card-title-row"><h3>${escapeHtml(app.title)}</h3>${getReleaseBadge(app)}</div>
           <p>${escapeHtml(app.description)}</p>
           <div class="card-bottom"><span class="tag">${escapeHtml(app.category)}</span><span class="open-label">열기 →</span></div>
         </a>`).join("");

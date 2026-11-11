@@ -50,3 +50,26 @@ GitHub 저장소에 프로젝트를 올린 뒤 Cloudflare Pages에서 Git 연동
 - 앱 HTML의 계산 로직은 유지하고, 포털 메타데이터만 추가했습니다.
 - 현재 카탈로그 생성은 HTML 파일만 검색합니다.
 - 외부 CDN을 사용하는 앱은 방문자의 네트워크에서 해당 CDN에 접근할 수 있어야 합니다.
+
+
+## 포털 기능 (v1.1.0)
+
+### 테마 변경
+- 우측 상단 달/해 버튼으로 라이트 모드와 다크 모드를 전환합니다.
+- 선택한 테마는 브라우저 `localStorage`에 저장되어 다음 방문에도 유지됩니다.
+
+### NEW / UPDATE 표시
+앱 HTML의 `<head>`에 아래 메타데이터를 설정합니다.
+
+```html
+<meta name="inote:version" content="1.1">
+<meta name="inote:updated" content="2026-11-11">
+<meta name="inote:badge" content="new">
+<meta name="inote:badge-until" content="2026-11-25">
+```
+
+- `inote:badge`: `new`, `update`, 또는 빈 값
+- `inote:badge-until`: 배지가 표시될 마지막 날짜 (`YYYY-MM-DD`)
+- 표시 기간이 지나면 포털에서 배지가 자동으로 숨겨집니다.
+- 기존 앱은 실제 신규/업데이트가 아니므로 배지를 비워 두었습니다.
+- 신규 앱은 `new`, 기존 앱의 기능 개선은 `update`로 설정하면 됩니다.

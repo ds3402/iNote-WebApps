@@ -56,6 +56,10 @@ const apps = walk(APP_ROOT).map((file) => {
     category: getMeta(source, "category") || "기타",
     icon: getMeta(source, "icon") || "🧰",
     keywords: getMeta(source, "keywords"),
+    version: getMeta(source, "version"),
+    updated: getMeta(source, "updated"),
+    badge: getMeta(source, "badge").toLowerCase(),
+    badgeUntil: getMeta(source, "badge-until"),
     url: relativeUrl(file),
     file: rel
   };
