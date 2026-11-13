@@ -1,4 +1,4 @@
-const CACHE_NAME = "inote-webapps-v1.2.1";
+const CACHE_NAME = "inote-webapps-v1.3.0";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -6,14 +6,14 @@ const PRECACHE_URLS = [
   "./manifest.webmanifest",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
-  "./App/resin_calculator_web_v2.html",
-  "./App/triangle_solver_v3.html",
-  "./App/PackCoverCalc.html",
-  "./App/hex_bolt_calculator_web_v2.html",
+  "./App/resin_calculator.html",
+  "./App/triangle_solver.html",
+  "./App/pack_cover_calculator.html",
+  "./App/bolt_length_calculator.html",
   "./App/text_converter.html",
-  "./App/unit_coverter_v3.html",
-  "./App/torque_web_converter_v3.html",
-  "./App/torque_web_calculator_v2.html"
+  "./App/unit_converter.html",
+  "./App/torque_converter.html",
+  "./App/torque_extension_calculator.html"
 ];
 
 self.addEventListener("install", event => {

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Triangle Solver v3 · Mobile</title>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#0f172a; --muted:#64748b; --border:#e2e8f0; --card:#ffffff; --subtle:#f8fafc; --ring:#94a3b8;
+      --accent:#0ea5e9; --accent-contrast:#ffffff; --accent-ink:#075985;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;color:var(--fg);background:var(--bg)}
+    header{position:sticky;top:0;backdrop-filter:saturate(180%) blur(8px);background:linear-gradient(180deg,#ffffffee,#ffffffcc);border-bottom:1px solid var(--border);z-index:10}
+    header .inner{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:680px;margin:0 auto;padding:10px 16px}
+    h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+    .maker{margin-left:8px;color:var(--muted);font-size:10px;white-space:nowrap}
+
+    .container{max-width:680px;margin:0 auto;padding:12px}
+    .section-title{font-size:14px;font-weight:700;color:#334155;margin:0 0 8px}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 1.5px rgba(2,6,23,.05),0 4px 12px rgba(2,6,23,.03);padding:12px}
+    .divider{height:1px;background:var(--border);margin:10px 0}
+
+    .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;background:#fff;padding:6px 10px;font-size:12px}
+    .mini{border:none;background:none;padding:2px 6px;font-size:12px;cursor:pointer;border-radius:8px}
+    .mini.active{font-weight:700;color:var(--accent-ink);background:#e0f2fe;border:1px solid #93c5fd;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:8px}
+    .toolbar .group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+    .diagram svg{width:100%;height:150px}
+
+    .grid-2{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px}
+    .grid-3{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px} /* 결과 2열 + 요약은 아래 한 줄 전체 */
+
+    .fieldset{background:var(--subtle);border:1px dashed var(--border);border-radius:14px;padding:10px}
+    .legend{font-size:12px;color:var(--muted);margin-bottom:6px}
+
+    label.input-row{display:flex;align-items:center;gap:10px;padding:6px 0;justify-content:space-between}
+    label.input-row span{width:26px;color:#334155;font-size:14px;font-weight:600}
+    /* 입력칸 폰트 크기 14px */
+    label.input-row input{flex:0 0 96px;max-width:100px;border:1px solid var(--border);border-radius:12px;padding:6px 8px;font-size:14px;background:#fff;transition:box-shadow .15s,border-color .15s}
+    label.input-row input:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px rgba(148,163,184,.25)}
+    label.input-row .right{width:28px;text-align:right;font-size:12px;color:var(--muted)}
+
+    .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center;border:1px solid var(--border);border-radius:12px;background:#fff;padding:10px 12px;font-size:14px;box-shadow:0 1px 2px rgba(2,6,23,.05);cursor:pointer}
+
+    .muted{color:var(--muted)}
+    .text-xs{font-size:12px}.text-sm{font-size:14px}
+
+    /* 결과 카드 */
+    .result-card .kv{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+    .result-card .label{color:var(--muted);font-size:14px}
+    .result-card .value{font-size:14px;font-weight:700;color:var(--accent-ink);}
+    .result-card .value sup{font-size:10px}
+    .summary-title{font-size:16px;font-weight:700;color:var(--fg);margin-bottom:6px} /* 요약 제목 크게 */
+
+    footer{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#ffffffcc,#ffffff);border-top:1px solid var(--border)}
+    footer .inner{max-width:680px;margin:0 auto;padding:8px 16px;text-align:center;color:var(--muted);font-size:12px}
+  </style>
+
+    <meta name="inote:title" content="삼각형 계산기">
+    <meta name="inote:description" content="변과 각을 이용해 삼각형의 길이, 각도, 둘레와 넓이를 계산합니다.">
+    <meta name="inote:category" content="Engineering">
+    <meta name="inote:icon" content="📐">
+    <meta name="inote:keywords" content="삼각형, 삼각함수, 변, 각도, 넓이">
+    <meta name="inote:publish" content="true">
+    <meta name="inote:version" content="1.0">
+    <meta name="inote:updated" content="2026-11-14">
+    <meta name="inote:changes" content="최초 통합 등록">
+    <meta name="inote:badge" content="">
+    <meta name="inote:badge-until" content="">
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <div style="display:flex;align-items:baseline;gap:8px;min-width:0">
+        <h1>Triangle Solver v3</h1>
+        <span class="maker">주식회사 유현</span>
+      </div>
+      <div class="group" style="display:flex;gap:8px;align-items:center">
+        <div class="chip" id="angleSeg" title="Angle unit">
+          <button type="button" data-angle="deg" class="mini active">deg</button>｜
+          <button type="button" data-angle="rad" class="mini">rad</button>
+        </div>
+        <div class="chip" id="unitSeg" title="Length unit">
+          <button type="button" data-unit="mm" class="mini active">mm</button>｜
+          <button type="button" data-unit="cm" class="mini">cm</button>｜
+          <button type="button" data-unit="m" class="mini">m</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Top diagram -->
+    <section class="diagram">
+      <div class="section-title">Diagram</div>
+      <div class="card">
+        <svg id="tri-svg" viewBox="0 0 100 100"></svg>
+        <div class="toolbar">
+          <div class="group">
+            <span id="caseChip" class="chip">AUTO</span>
+            <span id="solChip" class="chip">0 해</span>
+          </div>
+          <div class="group">
+            <button id="btnPNG" class="btn" type="button">PNG 저장</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="card mt12">
+      <h2 class="section-title">입력</h2>
+      <form id="inputsForm">
+        <div class="grid-2 fieldset">
+          <div>
+            <div class="legend">변 (a,b,c) <span class="muted">· <span id="unitLabel">mm</span></span></div>
+            <label class="input-row"><span>a</span><input id="in_a" inputmode="decimal" enterkeyhint="done" /><span class="right" id="unitTag1">mm</span></label>
+            <label class="input-row"><span>b</span><input id="in_b" inputmode="decimal" enterkeyhint="done" /><span class="right" id="unitTag2">mm</span></label>
+            <label class="input-row"><span>c</span><input id="in_c" inputmode="decimal" enterkeyhint="done" /><span class="right" id="unitTag3">mm</span></label>
+          </div>
+          <div>
+            <div class="legend">각 (<span id="angleUnitLabel">deg</span>)</div>
+            <label class="input-row"><span>A</span><input id="in_A" inputmode="decimal" enterkeyhint="done" /><span class="right angTag" id="angTagA">°</span></label>
+            <label class="input-row"><span>B</span><input id="in_B" inputmode="decimal" enterkeyhint="done" /><span class="right angTag" id="angTagB">°</span></label>
+            <label class="input-row"><span>C</span><input id="in_C" inputmode="decimal" enterkeyhint="done" /><span class="right angTag" id="angTagC">°</span></label>
+          </div>
+        </div>
+        <p class="muted text-xs" style="margin-top:8px">a,b,c 는 각각 A,B,C의 <b>맞은편 변</b>이에요. 필요한 포함각/조합은 자동으로 감지됩니다.</p>
+        <div class="divider"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="btnReset" class="btn" type="button">초기화</button>
+          <button id="btnShare" class="btn" type="button">공유</button>
+        </div>
+        <div id="errBox" class="mt8 text-xs" style="color:#dc2626"></div>
+      </form>
+    </section>
+
+    <!-- Results -->
+    <section class="mt12" id="resultsWrap">
+      <div id="results"></div>
+    </section>
+
+    <div style="height:64px"></div>
+  </main>
+
+  <footer><div class="inner">© <span id="yy"></span> Triangle Solver v3 · Mobile</div></footer>
+
+<script>
+(function(){
+  // --- Settings ---
+  const PRECISION = 1;
+  const UNIT_TO_M = { mm: 0.001, cm: 0.01, m: 1 };
+  let unit = 'mm';
+  let angleMode = 'deg';
+
+  // --- Helpers ---
+  const round=(n,d=PRECISION)=>{const f=Math.pow(10,d);return Math.round(n*f)/f};
+  const toRad=(deg)=>deg*Math.PI/180, toDeg=(rad)=>rad*180/Math.PI;
+  const clamp=(x)=>Math.max(-1,Math.min(1,x));
+  const pn=(s)=>{ if(s==null) return NaN; s=(''+s).trim(); if(s==='') return NaN; const n=parseFloat(s); return isNaN(n)?NaN:n; };
+
+  // --- Math ---
+  function anglesFromSSS(a,b,c){ const A=Math.acos(clamp((b*b+c*c-a*a)/(2*b*c))); const B=Math.acos(clamp((a*a+c*c-b*b)/(2*a*c))); const C=Math.PI-A-B; return {A,B,C}; }
+  function sssFromSAS(s1,ang,s2){ return Math.sqrt(s1*s1+s2*s2-2*s1*s2*Math.cos(ang)); }
+  function sssFromASA(sideKnown,A,B,C,sideVal){ if(Math.abs(A+B+C-Math.PI)>1e-9) throw new Error('각의 합은 180°/π 이어야 합니다.'); const R=sideVal/Math.sin({a:A,b:B,c:C}[sideKnown]); return {a:R*Math.sin(A), b:R*Math.sin(B), c:R*Math.sin(C)}; }
+  // Robust SSA solver for known angle A and its opposite side a, plus side b.
+  // Handles acute/obtuse/right A and the 0/1/2-solution ambiguous case.
+  function solveSSA(A,a,b){
+    const EPS=1e-10;
+    if(!(A>0 && A<Math.PI && a>0 && b>0)) return [];
+
+    // If A is right or obtuse, the opposite side a must be the longest.
+    // Therefore b >= a makes the triangle impossible.
+    if(A >= Math.PI/2-EPS && a <= b+EPS){
+      return [];
+    }
+
+    const sinB=(Math.sin(A)*b)/a;
+    if(sinB < -EPS || sinB > 1+EPS) return [];
+
+    const B1=Math.asin(clamp(sinB));
+    const candidates=[B1];
+
+    // For an acute A, the supplementary B can create the second SSA solution.
+    if(A < Math.PI/2-EPS){
+      const B2=Math.PI-B1;
+      if(Math.abs(B2-B1)>EPS) candidates.push(B2);
+    }
+
+    const out=[];
+    for(const B of candidates){
+      const C=Math.PI-A-B;
+      if(C <= EPS) continue;
+
+      const c=(Math.sin(C)*a)/Math.sin(A);
+      if(!(c>0) || !Number.isFinite(c)) continue;
+
+      // Independent sanity checks.
+      const lhsA=a/Math.sin(A);
+      const lhsB=b/Math.sin(B);
+      const lhsC=c/Math.sin(C);
+      const scale=Math.max(1,Math.abs(lhsA),Math.abs(lhsB),Math.abs(lhsC));
+      if(Math.max(Math.abs(lhsA-lhsB),Math.abs(lhsA-lhsC)) > 1e-8*scale) continue;
+
+      out.push({a,b,c,A,B,C});
+    }
+
+    // Remove numerical duplicates at the right-angle boundary.
+    return out.filter((s,i,arr)=>
+      i===arr.findIndex(t=>Math.abs(t.B-s.B)<EPS && Math.abs(t.C-s.C)<EPS)
+    );
+  }
+
+  // --- Diagram ---
+  function drawDiagram(){
+    const svg=document.getElementById('tri-svg'); svg.innerHTML='';
+    const A={x:12,y:88}, B={x:88,y:88}, C={x:52,y:14};
+    const mid=(p1,p2)=>({x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2}); const m_a=mid(B,C), m_b=mid(A,C), m_c=mid(A,B);
+
+    // triangle
+    const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points',`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    poly.setAttribute('fill','none'); poly.setAttribute('stroke','currentColor'); poly.setAttribute('stroke-width','1.4');
+    svg.appendChild(poly);
+
+    // vertex labels (A,B,C) — bigger + offset to avoid overlap
+    [[A,'A',-4,8],[B,'B',4,8],[C,'C',2,-4]].forEach(([p,t,dx,dy])=>{
+      const circ=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circ.setAttribute('cx',p.x); circ.setAttribute('cy',p.y); circ.setAttribute('r','1.6'); svg.appendChild(circ);
+      const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x',p.x+dx); label.setAttribute('y',p.y+dy); label.setAttribute('font-size','6.5'); label.textContent=t; svg.appendChild(label);
+    });
+
+    // side labels (a,b,c) — bigger + offset (c는 밑변 아래쪽)
+    [[m_a,'a',0,-4],[m_b,'b',-6,0],[m_c,'c',0,10]].forEach(([p,t,dx,dy])=>{
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',p.x+dx); lbl.setAttribute('y',p.y+dy); lbl.setAttribute('font-size','6'); lbl.textContent=t; svg.appendChild(lbl);
+    });
+  }
+
+  // --- Elements ---
+  const $=(s)=>document.querySelector(s);
+  const inputs=['a','b','c','A','B','C'].map(id=>$('#in_'+id));
+  const errBox=$('#errBox'), resultsEl=$('#results');
+  const caseChip=$('#caseChip'), solChip=$('#solChip');
+  const angleSeg=$('#angleSeg'), unitSeg=$('#unitSeg');
+  const angleUnitLabel=$('#angleUnitLabel');
+  const unitLabel=$('#unitLabel');
+  const unitTag1=$('#unitTag1'), unitTag2=$('#unitTag2'), unitTag3=$('#unitTag3');
+  const angTags=[...document.querySelectorAll('.angTag')]; // A/B/C 모두
+
+  // UX: prevent Enter submit/blur
+  $('#inputsForm').addEventListener('submit',e=>e.preventDefault()); inputs.forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();}}));
+
+  // Parse
+  function parseAll(){
+    const u = UNIT_TO_M[unit];
+    const a=pn(inputs[0].value)*u, b=pn(inputs[1].value)*u, c=pn(inputs[2].value)*u;
+    const A=(angleMode==='deg'? toRad(pn(inputs[3].value)) : pn(inputs[3].value));
+    const B=(angleMode==='deg'? toRad(pn(inputs[4].value)) : pn(inputs[4].value));
+    const C=(angleMode==='deg'? toRad(pn(inputs[5].value)) : pn(inputs[5].value));
+    return {a,b,c,A,B,C};
+  }
+
+  function detectCase(p){
+    const pos=(x)=>Number.isFinite(x)&&x>0;
+    const validAng=(x)=>Number.isFinite(x)&&x>0&&x<Math.PI;
+    const has={ a:pos(p.a), b:pos(p.b), c:pos(p.c), A:validAng(p.A), B:validAng(p.B), C:validAng(p.C) };
+    if (has.a && has.b && has.c) return 'SSS';
+    if ((has.a&&has.b&&has.C)||(has.b&&has.c&&has.A)||(has.c&&has.a&&has.B)) return 'SAS';
+    if (((has.A&&has.B)||(has.B&&has.C)||(has.C&&has.A)) && (has.a||has.b||has.c)) return 'ASA';
+    if ((has.A&&has.a&&(has.b||has.c))||(has.B&&has.b&&(has.c||has.a))||(has.C&&has.c&&(has.a||has.b))) return 'SSA';
+    return 'AUTO';
+  }
+
+  // Validate redundant inputs against the triangle represented by the detected case.
+  // Returns a human-readable error when supplied values contradict the calculated triangle.
+  function validateConsistency(p, mode, solutions){
+    const EPS_REL=1e-7, EPS_ANG=1e-7;
+    const near=(x,y,rel=EPS_REL)=>Math.abs(x-y)<=rel*Math.max(1,Math.abs(x),Math.abs(y));
+    const nearAng=(x,y)=>Math.abs(x-y)<=EPS_ANG*Math.max(1,Math.abs(x),Math.abs(y));
+
+    if(!solutions.length) return null;
+    const s=solutions[0];
+
+    const checks=[];
+    if(Number.isFinite(p.a)&&p.a>0) checks.push(['a',p.a,s.a,false]);
+    if(Number.isFinite(p.b)&&p.b>0) checks.push(['b',p.b,s.b,false]);
+    if(Number.isFinite(p.c)&&p.c>0) checks.push(['c',p.c,s.c,false]);
+    if(Number.isFinite(p.A)&&p.A>0&&p.A<Math.PI) checks.push(['A',p.A,s.A,true]);
+    if(Number.isFinite(p.B)&&p.B>0&&p.B<Math.PI) checks.push(['B',p.B,s.B,true]);
+    if(Number.isFinite(p.C)&&p.C>0&&p.C<Math.PI) checks.push(['C',p.C,s.C,true]);
+
+    const mismatches=checks.filter(([name,input,calc,isAng])=>
+      isAng ? !nearAng(input,calc) : !near(input,calc)
+    );
+
+    if(mismatches.length){
+      const [name,input,calc,isAng]=mismatches[0];
+      const displayInput=round(isAng ? (angleMode==='deg'?toDeg(input):input) : input/UNIT_TO_M[unit]);
+      const displayCalc=round(isAng ? (angleMode==='deg'?toDeg(calc):calc) : calc/UNIT_TO_M[unit]);
+      const suffix=isAng ? (angleMode==='deg'?'°':' rad') : ` ${unit}`;
+      return `입력값이 서로 일치하지 않습니다. ${name} 입력값 ${displayInput}${suffix}, 계산값 ${displayCalc}${suffix}입니다.`;
+    }
+
+    // Independent angle-sum check for redundant angle input.
+    const suppliedAngles=[p.A,p.B,p.C].filter(Number.isFinite);
+    if(suppliedAngles.length>=2 && suppliedAngles.length<=3){
+      const sum=suppliedAngles.reduce((x,y)=>x+y,0);
+      if(Math.abs(sum-Math.PI)>EPS_ANG){
+        const display=round(angleMode==='deg'?toDeg(sum):sum);
+        return angleMode==='deg'
+          ? `입력한 각의 합이 180°가 아닙니다. 현재 합계는 ${display}°입니다.`
+          : `입력한 각의 합이 π가 아닙니다. 현재 합계는 ${display} rad입니다.`;
+      }
+    }
+    return null;
+  }
+
+  function render(){
+    errBox.textContent=''; resultsEl.innerHTML='';
+    const p=parseAll();
+
+    // Explicitly reject invalid angle entries (0, 180°/π or beyond).
+    const rawAngles=[p.A,p.B,p.C].filter(Number.isFinite);
+    if(rawAngles.some(x=>x<=0||x>=Math.PI)){
+      errBox.textContent = angleMode==='deg'
+        ? '각도는 0°보다 크고 180°보다 작아야 합니다.'
+        : '각도는 0보다 크고 π보다 작아야 합니다.';
+      caseChip.textContent='AUTO';
+      solChip.textContent='0 해';
+      const div=document.createElement('div');
+      div.className='card';
+      div.textContent='입력한 각도를 확인해주세요.';
+      resultsEl.appendChild(div);
+      return;
+    }
+
+    const mode=detectCase(p);
+    caseChip.textContent = mode;
+
+    let solutions=[]; // {a,b,c,A,B,C}
+    try{
+      if (mode==='SSS'){
+        if (p.a+p.b<=p.c || p.a+p.c<=p.b || p.b+p.c<=p.a) throw new Error('삼각부등식을 만족하지 않습니다.');
+        const ang=anglesFromSSS(p.a,p.b,p.c); solutions.push({a:p.a,b:p.b,c:p.c,A:ang.A,B:ang.B,C:ang.C});
+      }
+      else if (mode==='SAS'){
+        if (Number.isFinite(p.C)&&p.C>0&&p.C<Math.PI && Number.isFinite(p.a)&&p.a>0 && Number.isFinite(p.b)&&p.b>0){
+          const c=sssFromSAS(p.a,p.C,p.b); const ang=anglesFromSSS(p.a,p.b,c); solutions.push({a:p.a,b:p.b,c,A:ang.A,B:ang.B,C:ang.C});
+        }
+        else if (Number.isFinite(p.A)&&p.A>0&&p.A<Math.PI && Number.isFinite(p.b)&&p.b>0 && Number.isFinite(p.c)&&p.c>0){
+          const a=sssFromSAS(p.b,p.A,p.c); const ang=anglesFromSSS(a,p.b,p.c); solutions.push({a,b:p.b,c:p.c,A:ang.A,B:ang.B,C:ang.C});
+        }
+        else if (Number.isFinite(p.B)&&p.B>0&&p.B<Math.PI && Number.isFinite(p.c)&&p.c>0 && Number.isFinite(p.a)&&p.a>0){
+          const b=sssFromSAS(p.c,p.B,p.a); const ang=anglesFromSSS(p.a,b,p.c); solutions.push({a:p.a,b,c:p.c,A:ang.A,B:ang.B,C:ang.C});
+        }
+      }
+      else if (mode==='ASA'){
+        let A=p.A,B=p.B,C=p.C; const arr=[p.A,p.B,p.C]; const idxs=arr.map((v,i)=>({v,i})).filter(o=>Number.isFinite(o.v)&&o.v>0).map(o=>o.i);
+        if (idxs.length>=2){ if(!(Number.isFinite(A)&&A>0) || !(Number.isFinite(B)&&B>0)){ A=arr[idxs[0]]; B=arr[idxs[1]]; C=Math.PI-A-B; } else { C=Math.PI-A-B; }
+          if (C<=0) throw new Error('각의 합이 180°/π 미만이어야 합니다.');
+          const sideKnown = Number.isFinite(p.a)&&p.a>0 ? 'a' : (Number.isFinite(p.b)&&p.b>0 ? 'b' : 'c');
+          const val = sideKnown==='a'? p.a : sideKnown==='b'? p.b : p.c; if (!(Number.isFinite(val)&&val>0)) throw new Error('ASA/AAS는 한 변이 필요합니다.');
+          const s=sssFromASA(sideKnown,A,B,C,val); solutions.push({a:s.a,b:s.b,c:s.c,A,B,C});
+        }
+      }
+      else if (mode==='SSA'){
+        const push=(r,rot)=>{
+          if(!r) return; const rot3=(x)=> rot===0?x : (rot===1?[x[2],x[0],x[1]] : [x[1],x[2],x[0]]);
+          const sides=rot3([r.a,r.b,r.c]); const angs=rot3([r.A,r.B,r.C]);
+          solutions.push({a:sides[0],b:sides[1],c:sides[2],A:angs[0],B:angs[1],C:angs[2]});
+        };
+        // All six SSA permutations:
+        // A-a-b, A-a-c, B-b-a, B-b-c, C-c-a, C-c-b
+        const addSSA=(knownAngle,knownSide,otherSide,swap)=>{
+          solveSSA(knownAngle,knownSide,otherSide).forEach(r=>{
+            if(!swap) push(r,0);
+            else {
+              // Map local (a,b,c,A,B,C) back to global labels.
+              solutions.push(swap(r));
+            }
+          });
+        };
+
+        if (Number.isFinite(p.A)&&p.A>0&&p.A<Math.PI && Number.isFinite(p.a)&&p.a>0){
+          if(Number.isFinite(p.b)&&p.b>0)
+            addSSA(p.A,p.a,p.b,null);
+          if(Number.isFinite(p.c)&&p.c>0)
+            addSSA(p.A,p.a,p.c,r=>({a:r.a,b:r.c,c:r.b,A:r.A,B:r.C,C:r.B}));
+        }
+        if (Number.isFinite(p.B)&&p.B>0&&p.B<Math.PI && Number.isFinite(p.b)&&p.b>0){
+          if(Number.isFinite(p.a)&&p.a>0)
+            addSSA(p.B,p.b,p.a,r=>({a:r.b,b:r.a,c:r.c,A:r.B,B:r.A,C:r.C}));
+          if(Number.isFinite(p.c)&&p.c>0)
+            addSSA(p.B,p.b,p.c,r=>({a:r.c,b:r.b,c:r.a,A:r.C,B:r.B,C:r.A}));
+        }
+        if (Number.isFinite(p.C)&&p.C>0&&p.C<Math.PI && Number.isFinite(p.c)&&p.c>0){
+          if(Number.isFinite(p.a)&&p.a>0)
+            addSSA(p.C,p.c,p.a,r=>({a:r.b,b:r.c,c:r.a,A:r.B,B:r.C,C:r.A}));
+          if(Number.isFinite(p.b)&&p.b>0)
+            addSSA(p.C,p.c,p.b,r=>({a:r.c,b:r.a,c:r.b,A:r.C,B:r.A,C:r.B}));
+        }
+      }
+    }catch(e){ errBox.textContent=e.message||String(e); }
+
+    // If the user supplied extra values, verify that they agree with the solved triangle.
+    const consistencyError=validateConsistency(p,mode,solutions);
+    if(consistencyError){
+      solChip.textContent='입력 오류';
+      const div=document.createElement('div');
+      div.className='card';
+      div.innerHTML=`<b style="color:#dc2626">입력값 검증 실패</b><div class="muted text-xs" style="margin-top:6px">${consistencyError}</div>`;
+      resultsEl.appendChild(div);
+      return;
+    }
+
+    solChip.textContent = `${solutions.length} 해`;
+
+    if (!solutions.length){
+      const div=document.createElement('div'); div.className='card'; div.textContent='필수 값을 입력하면 결과가 표시합니다.'; resultsEl.appendChild(div); return;
+    }
+
+    // Render results: Row1(변/각), Row2(요약)
+    solutions.forEach((s,idx)=>{
+      const rU = 1/UNIT_TO_M[unit];
+      const a=round(s.a*rU), b=round(s.b*rU), c=round(s.c*rU);
+      const A=round(angleMode==='deg'? toDeg(s.A): s.A), B=round(angleMode==='deg'? toDeg(s.B): s.B), C=round(angleMode==='deg'? toDeg(s.C): s.C);
+      const P=round((s.a+s.b+s.c)*rU), area=round(0.5*s.b*s.c*Math.sin(s.A)*rU*rU);
+
+      const card=document.createElement('div'); card.className='card result-card';
+      const head=document.createElement('div'); head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center';
+      const title=document.createElement('div'); title.className='text-sm'; title.innerHTML = `<b>Solution ${idx+1}</b>`; head.appendChild(title);
+      card.appendChild(head);
+      const divi=document.createElement('div'); divi.className='divider'; card.appendChild(divi);
+
+      const grid=document.createElement('div'); grid.className='grid-3';
+      const s1=document.createElement('div'); s1.className='card'; s1.style.boxShadow='none'; s1.innerHTML = `
+        <div class="muted text-xs">변</div>
+        <div class="kv"><span class="label">a</span><span class="value">${a} ${unit}</span></div>
+        <div class="kv"><span class="label">b</span><span class="value">${b} ${unit}</span></div>
+        <div class="kv"><span class="label">c</span><span class="value">${c} ${unit}</span></div>`;
+      const s2=document.createElement('div'); s2.className='card'; s2.style.boxShadow='none'; s2.innerHTML = `
+        <div class="muted text-xs">각 (${angleMode})</div>
+        <div class="kv"><span class="label">A</span><span class="value">${A}</span></div>
+        <div class="kv"><span class="label">B</span><span class="value">${B}</span></div>
+        <div class="kv"><span class="label">C</span><span class="value">${C}</span></div>`;
+      const s3=document.createElement('div'); s3.className='card'; s3.style.boxShadow='none'; s3.style.gridColumn='1 / -1'; s3.innerHTML = `
+        <div class="summary-title">요약</div>
+        <div class="kv"><span class="label">둘레</span><span class="value">${P} ${unit}</span></div>
+        <div class="kv"><span class="label">넓이</span><span class="value">${area} ${unit}<sup>2</sup></span></div>`;
+
+      grid.appendChild(s1); grid.appendChild(s2); grid.appendChild(s3);
+      card.appendChild(grid); resultsEl.appendChild(card);
+    });
+  }
+
+  // Share text
+  document.getElementById('btnShare')?.addEventListener('click', async ()=>{
+    const txt = document.getElementById('results').innerText || '';
+    if (navigator.share){ try{ await navigator.share({title:'Triangle', text:txt}); }catch{} }
+    else { await navigator.clipboard.writeText(txt); alert('결과를 클립보드에 복사했습니다.'); }
+  });
+
+  // PNG export
+  document.getElementById('btnPNG').addEventListener('click', async ()=>{
+    const svg=document.getElementById('tri-svg'); const xml=new XMLSerializer().serializeToString(svg); const svg64=btoa(unescape(encodeURIComponent(xml)));
+    const img=new Image(); img.src='data:image/svg+xml;base64,'+svg64; await new Promise(r=>img.onload=r);
+    const canvas=document.createElement('canvas'); canvas.width=svg.clientWidth||600; canvas.height=svg.clientHeight||150; const ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=`triangle_${Date.now()}.png`; a.click();
+  });
+
+  // Inputs & toggles
+  document.getElementById('inputsForm').addEventListener('input', ()=>{ setTimeout(render, 160); });
+  document.getElementById('btnReset').addEventListener('click', ()=>{ ['in_a','in_b','in_c','in_A','in_B','in_C'].forEach(id=>document.getElementById(id).value=''); render(); });
+
+  // Toggles
+  angleSeg.addEventListener('click', (e)=>{ const b=e.target.closest('button'); if(!b) return; angleMode=b.dataset.angle; [...angleSeg.querySelectorAll('button')].forEach(x=>x.classList.toggle('active', x===b)); angleUnitLabel.textContent=angleMode; angTags.forEach(t=>t.textContent = angleMode==='deg' ? '°' : 'rad'); render(); });
+  unitSeg.addEventListener('click', (e)=>{ const b=e.target.closest('button'); if(!b) return; unit=b.dataset.unit; [...unitSeg.querySelectorAll('button')].forEach(x=>x.classList.toggle('active', x===b)); unitLabel.textContent=unit; unitTag1.textContent=unit; unitTag2.textContent=unit; unitTag3.textContent=unit; render(); });
+
+  // Init
+  document.getElementById('yy').textContent=new Date().getFullYear();
+  drawDiagram(); render();
+})();
+</script>
+</body>
+</html>

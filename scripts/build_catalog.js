@@ -58,6 +58,7 @@ const apps = walk(APP_ROOT).map((file) => {
     keywords: getMeta(source, "keywords"),
     version: getMeta(source, "version"),
     updated: getMeta(source, "updated"),
+    changes: getMeta(source, "changes"),
     badge: getMeta(source, "badge").toLowerCase(),
     badgeUntil: getMeta(source, "badge-until"),
     url: relativeUrl(file),

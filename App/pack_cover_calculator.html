@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+  <title>PackCoverCalc - 포장재 커버 사이즈 계산기</title>
+  <style>
+    :root{
+      --bg:#f7f8fa; --card:#fff; --text:#111; --muted:#6b7280; --primary:#0a84ff; --border:#e5e7eb;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;overflow-x:hidden}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;-webkit-text-size-adjust:100%}
+    .wrap{width:min(1060px,100%);padding:24px 12px;margin:0 auto}
+
+    header{margin-bottom:12px;text-align:center}
+    header .maker{font-size:11px;color:var(--muted);margin-bottom:4px}
+    header h1{font-size:22px;margin:0}
+    .sub{color:var(--muted);font-size:12px;margin-bottom:14px}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:860px){.grid{grid-template-columns:repeat(5,1fr)}}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+    input,select{width:100%;padding:12px 12px;border:1px solid var(--border);border-radius:12px;font-size:16px;background:#fff;outline:none;min-width:0}
+    input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(10,132,255,.12)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .btn{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:600;cursor:pointer}
+    .btn.primary{background:var(--primary);color:#fff;border-color:transparent}
+    .btn.danger{background:#fff;color:var(--danger);border-color:#fecaca}
+    .muted{color:var(--muted);font-size:12px}
+
+    .table-wrap{margin-top:12px}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;text-align:right;white-space:nowrap}
+    th:first-child, td:first-child{text-align:left}
+    tr:hover{background:#fafafa}
+
+    /* 작은 화면에서 카드형 리스트로 전환 → 가로 스크롤 방지 */
+    @media(max-width:640px){
+      table, thead, tbody, th, tr{display:block;width:100%}
+      thead{display:none}
+      tbody{display:grid;gap:10px}
+      tr{border:1px solid var(--border);border-radius:12px;background:#fff;padding:8px 12px}
+      td{display:flex;justify-content:space-between;align-items:center;border-bottom:0;padding:6px 0;text-align:left;white-space:normal;gap:12px}
+      td::before{content:attr(data-label);color:var(--muted);font-size:12px;flex:0 0 auto;margin-right:8px}
+      td:last-child{justify-content:flex-end}
+    }
+
+    .chip{font-size:12px;color:#fff;background:var(--primary);padding:2px 8px;border-radius:999px}
+    .sum{display:grid;gap:8px;margin-top:12px}
+    .line{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px dashed var(--border);border-radius:12px}
+    .line strong{font-size:16px}
+    .recos{display:grid;gap:10px;margin-top:10px}
+    .reco{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:#fafafa}
+    .reco .title{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .reco .meta{margin-top:6px;font-size:12px;color:var(--muted)}
+    .ratio-recommend{font-size:11px;color:var(--muted);padding:2px 4px;margin-top:-4px}
+    .ratio-recommend strong{color:var(--primary);font-weight:700}
+    footer{margin-top:18px;color:var(--muted);font-size:11px;text-align:center}
+  </style>
+
+    <meta name="inote:title" content="포장재 커버 사이즈 계산기">
+    <meta name="inote:description" content="포장 대상의 치수를 바탕으로 포장재 커버 사이즈를 산출합니다.">
+    <meta name="inote:category" content="Engineering">
+    <meta name="inote:icon" content="📦">
+    <meta name="inote:keywords" content="포장재, 커버, 사이즈, 치수">
+    <meta name="inote:publish" content="true">
+    <meta name="inote:version" content="1.1">
+    <meta name="inote:updated" content="2026-11-14">
+    <meta name="inote:changes" content="입력 예시를 mm 기준으로 정리, 숫자 천 단위 구분 표시, 추천 치수 탐색 정밀도 개선 및 전체 비율 비교 추천 추가">
+    <meta name="inote:badge" content="update">
+    <meta name="inote:badge-until" content="2026-11-28">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="maker">© 주식회사 유현</div>
+      <h1>PackCoverCalc</h1>
+    </header>
+    <div class="sub">포장재 커버 사이즈 계산기 (육면체에서 <b>바닥 제외</b>) — 공식: <code>W×L + 2×W×H + 2×L×H</code></div>
+
+    <!-- 입력 -->
+    <section class="card" aria-label="입력">
+      <div class="grid">
+        <div>
+          <label for="w">가로 (W)</label>
+          <input id="w" type="number" inputmode="decimal" min="0" placeholder="예: 1200" />
+        </div>
+        <div>
+          <label for="l">세로 (L)</label>
+          <input id="l" type="number" inputmode="decimal" min="0" placeholder="예: 800" />
+        </div>
+        <div>
+          <label for="h">높이 (H)</label>
+          <input id="h" type="number" inputmode="decimal" min="0" placeholder="예: 600" />
+        </div>
+        <div>
+          <label for="qty">수량</label>
+          <input id="qty" type="number" inputmode="numeric" min="1" step="1" value="1" />
+        </div>
+        <div>
+          <label for="unit">단위</label>
+          <select id="unit">
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="m">m</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="addBtn" class="btn primary" type="button">항목 추가</button>
+        <button id="clearBtn" class="btn danger" type="button">전체 삭제</button>
+        <button id="copyBtn" class="btn" type="button">목록/합계 복사</button>
+      </div>
+      <div class="muted" style="margin-top:6px">
+        ※ 각 항목은 입력 당시의 단위로 저장됩니다. 합계는 자동으로 m²로 환산됩니다.<br>
+        ※ 평면일 경우에는 높이를 0으로 입력하세요.
+      </div>
+    </section>
+
+    <!-- 리스트 & 합계 -->
+    <section class="card" style="margin-top:14px" aria-live="polite" aria-label="리스트와 합계">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="muted">항목 수: <span id="count">0</span> | 총 수량: <span id="countQty">0</span></div>
+        <div><span class="chip">Top = W×L, Side = 2×W×H + 2×L×H</span></div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>W</th>
+              <th>L</th>
+              <th>H</th>
+              <th>단위</th>
+              <th>수량</th>
+              <th>개당 (단위²)</th>
+              <th>개당 (m²)</th>
+              <th>합계 (m²)</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="sum">
+        <div class="line"><span>합계 (m²)</span><strong id="sumM2">0.0000 m²</strong></div>
+        <div class="line">
+          <span>합계 (선택 단위)</span>
+          <span>
+            <select id="sumUnit" style="padding:6px 8px;border:1px solid var(--border);border-radius:10px">
+              <option value="mm">mm²</option>
+              <option value="cm">cm²</option>
+              <option value="m" selected>m²</option>
+            </select>
+            <strong id="sumInUnit" style="margin-left:8px">0.0000 m²</strong>
+          </span>
+        </div>
+
+        <!-- 동일 면적 추천 -->
+        <div class="line" style="align-items:flex-start;gap:10px;flex-wrap:wrap">
+          <span>동일 면적 추천 치수</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label class="muted">표시 단위
+              <select id="recoUnit" style="padding:6px 8px;border:1px solid var(--border);border-radius:10px;margin-left:6px">
+                <option value="mm" selected>mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+              </select>
+            </label>
+            <label class="muted">W:L 비율
+              <select id="recoRatio" style="padding:6px 8px;border:1px solid var(--border);border-radius:10px;margin-left:6px">
+                <option value="1:1">1:1</option>
+                <option value="4:3" selected>4:3 (기본)</option>
+                <option value="3:2">3:2</option>
+                <option value="16:9">16:9</option>
+                <option value="2:1">2:1</option>
+                <option value="3:1">3:1</option>
+              </select>
+            </label>
+            <label class="muted">추천 높이 H (mm)
+              <input id="recoH" type="number" inputmode="numeric" step="10" min="0" value="3000"
+                style="margin-left:6px;width:140px;padding:6px 8px;border:1px solid var(--border);border-radius:10px">
+            </label>
+            <span class="muted">치수는 10mm 단위로 스냅</span>
+          </div>
+        </div>
+        <div class="recos" id="recoList"></div>
+        <div class="row" style="margin-top:8px">
+          <button id="copyReco" class="btn" type="button">추천 치수 복사</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>PackCoverCalc © 주식회사 유현</footer>
+  </div>
+
+  <script>
+    // ===== 유틸 =====
+    const $ = id => document.getElementById(id);
+    const fmt = (v,d=4)=>Number(v).toFixed(d);
+    // 숫자 표시: 천 단위 콤마 적용, 불필요한 소수점 0은 제거하고 값 자체는 반올림하지 않음
+    function formatListNumber(value){
+      let raw = Number(value).toString();
+      if (!Number.isFinite(Number(value))) return String(value);
+      // 지수 표기 숫자는 일반 소수 표기로 변환
+      if (/e/i.test(raw)) {
+        const [coefficient, exponentText] = raw.toLowerCase().split('e');
+        const exponent = Number(exponentText);
+        const negative = coefficient.startsWith('-');
+        const unsigned = negative ? coefficient.slice(1) : coefficient;
+        const [whole, fraction = ''] = unsigned.split('.');
+        const digits = whole + fraction;
+        const point = whole.length + exponent;
+        raw = point <= 0 ? '0.' + '0'.repeat(-point) + digits
+          : point >= digits.length ? digits + '0'.repeat(point - digits.length)
+          : digits.slice(0, point) + '.' + digits.slice(point);
+        if (negative) raw = '-' + raw;
+      }
+      const [integerPart, ...fractionParts] = raw.split('.');
+      const fraction = (fractionParts.join('').replace(/0+$/, ''));
+      const groupedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return fraction ? `${groupedInteger}.${fraction}` : groupedInteger;
+    }
+    const snap10mm = mm=>Math.round(mm/10)*10;
+    const toM2FromUnit=(a,u)=>u==="mm"?a/1e6:u==="cm"?a/1e4:a;
+    const fromM2ToUnit=(m2,u)=>u==="mm"?m2*1e6:u==="cm"?m2*1e4:m2;
+    const lenToUnit=(m,u)=>u==="mm"?m*1000:u==="cm"?m*100:m;
+
+    // ===== 상태 =====
+    const items=[]; const TBL=$("tbl").querySelector("tbody");
+
+    // ===== 계산 =====
+    function area5faces(w,l,h){ return w*l + 2*w*h + 2*l*h; }
+
+    // ===== 렌더 =====
+    function render(){
+      TBL.innerHTML="";
+      items.forEach((it,i)=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+          <td data-label="#">${i+1}</td>
+          <td data-label="W">${formatListNumber(it.w)}</td>
+          <td data-label="L">${formatListNumber(it.l)}</td>
+          <td data-label="H">${formatListNumber(it.h)}</td>
+          <td data-label="단위">${it.unit}</td>
+          <td data-label="수량">${formatListNumber(it.qty)}</td>
+          <td data-label="개당 (단위²)">${formatListNumber(it.areaPerUnit2)} ${it.unit}²</td>
+          <td data-label="개당 (m²)">${formatListNumber(it.areaPerM2)} m²</td>
+          <td data-label="합계 (m²)">${formatListNumber(it.totalM2)} m²</td>
+          <td data-label="작업"><button class="btn danger" data-idx="${i}" style="padding:6px 10px">삭제</button></td>`;
+        TBL.appendChild(tr);
+      });
+
+      $("count").textContent=items.length;
+      $("countQty").textContent=items.reduce((s,it)=>s+it.qty,0);
+
+      const sumM2=items.reduce((s,it)=>s+it.totalM2,0);
+      $("sumM2").textContent=`${sumM2.toFixed(4)} m²`;
+      $("sumInUnit").textContent=`${fromM2ToUnit(sumM2,$("sumUnit").value).toFixed($("sumUnit").value==="m"?4:2)} ${$("sumUnit").value}²`;
+
+      // 삭제 버튼
+      TBL.querySelectorAll("button[data-idx]").forEach(b=>{
+        b.onclick=()=>{ items.splice(Number(b.dataset.idx),1); render(); };
+      });
+
+      renderReco(sumM2);
+    }
+
+    // ===== 아이템 추가/복사/삭제 =====
+    function addItem(){
+      const w=Number($("w").value), l=Number($("l").value), h=Number($("h").value);
+      const qty=Math.max(1, parseInt($("qty").value)||1), unit=$("unit").value;
+
+      if(![w,l,h].every(n=>Number.isFinite(n)&&n>=0)){
+        alert("가로/세로/높이에 올바른 숫자를 입력하세요."); return;
+      }
+
+      const area2=area5faces(w,l,h);
+      const areaM2=toM2FromUnit(area2, unit);
+      const totalM2=areaM2*qty;
+
+      items.push({w,l,h,qty,unit,areaPerUnit2:area2,areaPerM2:areaM2,totalM2});
+
+      // 입력 초기화 (수량은 항상 1)
+      $("w").value=""; $("l").value=""; $("h").value=""; $("qty").value="1"; $("w").focus();
+      render();
+    }
+
+    function clearAll(){ if(!items.length) return; if(!confirm("모든 항목을 삭제할까요?")) return; items.splice(0); render(); }
+
+    function copyAll(){
+      const lines=["[5면 포장재 면적 목록]"];
+      if(!items.length){ lines.push("(항목 없음)"); }
+      else{
+        lines.push("No\tW\tL\tH\t단위\t수량\t개당(단위²)\t개당(m²)\t합계(m²)");
+        items.forEach((it,i)=>{
+          lines.push([
+            i+1, it.w.toFixed(2), it.l.toFixed(2), it.h.toFixed(2),
+            it.unit, it.qty,
+            `${it.areaPerUnit2.toFixed(2)} ${it.unit}²`,
+            `${it.areaPerM2.toFixed(4)} m²`,
+            `${it.totalM2.toFixed(4)} m²`
+          ].join("\t"));
+        });
+      }
+      const totalQty=items.reduce((s,it)=>s+it.qty,0);
+      const sumM2=items.reduce((s,it)=>s+it.totalM2,0);
+      lines.push(""); lines.push(`총 수량: ${totalQty}`); lines.push(`합계: ${sumM2.toFixed(4)} m²`);
+      navigator.clipboard?.writeText(lines.join("\n")).then(()=>alert("목록과 합계를 복사했습니다."))
+        .catch(()=>alert("복사에 실패했습니다. 브라우저 권한을 확인해주세요."));
+    }
+
+    // ===== 추천 (선택 비율 우선 유지 + 목표 면적 근접 + H ±20mm 탐색) =====
+    // 선택한 W:L 비율을 기준으로 W/L 조합을 탐색한다.
+    // 목표 이하 후보 중 목표 면적에 가장 가까운 조합을 선택하고,
+    // 목표 이하 후보가 없으면 목표를 초과하는 후보 중 가장 가까운 조합을 선택한다.
+    function recommendByRatioAndHeight(Sm2, ratioStr, Hmm){
+      const [p,q]=ratioStr.split(":").map(Number);
+      const k=(p||1)/(q||1);
+      const targetHmm = snap10mm(Math.max(0, Hmm));
+      const heights = [...new Set([-20,-10,0,10,20]
+        .map(d => targetHmm + d).filter(h => h >= 0))];
+
+      let bestUnder = null;
+      let bestOver = null;
+      const stepMm = 10;
+      const eps = 1e-10;
+
+      function consider(Wmm, Lmm, HmmCandidate){
+        if (!(Wmm > 0 && Lmm > 0)) return;
+        const Wm = Wmm / 1000;
+        const Lm = Lmm / 1000;
+        const Hm = HmmCandidate / 1000;
+        const area = area5faces(Wm, Lm, Hm);
+        const candidate = {
+          W: Wm, L: Lm, H: Hm, S_actual: area,
+          ratioError: Math.abs((Wm / Lm) - k),
+          heightError: Math.abs(HmmCandidate - targetHmm)
+        };
+        if (area <= Sm2 + eps){
+          if (!bestUnder || area > bestUnder.S_actual + eps ||
+              (Math.abs(area - bestUnder.S_actual) <= eps &&
+               (candidate.ratioError < bestUnder.ratioError - eps ||
+                (Math.abs(candidate.ratioError - bestUnder.ratioError) <= eps && candidate.heightError < bestUnder.heightError)))) {
+            bestUnder = candidate;
+          }
+        } else if (!bestOver || area < bestOver.S_actual - eps ||
+                   (Math.abs(area - bestOver.S_actual) <= eps &&
+                    (candidate.ratioError < bestOver.ratioError - eps ||
+                     (Math.abs(candidate.ratioError - bestOver.ratioError) <= eps && candidate.heightError < bestOver.heightError)))) {
+          bestOver = candidate;
+        }
+      }
+
+      heights.forEach(HmmCandidate => {
+        const Hm = HmmCandidate / 1000;
+        // W=kL을 기준으로 목표 면적을 만족하는 연속 L을 계산한 뒤,
+        // 10mm 격자에서 비율에 가장 가까운 W 후보를 비교한다.
+        const b = 2 * Hm * (k + 1);
+        const Lideal = (-b + Math.sqrt(b*b + 4*k*Sm2)) / (2*k);
+        if (!Number.isFinite(Lideal) || Lideal <= 0) return;
+        const maxLmm = Math.max(stepMm, Math.ceil((Lideal * 1000 + 30) / stepMm) * stepMm);
+
+        for (let Lmm = stepMm; Lmm <= maxLmm; Lmm += stepMm){
+          const idealWmm = k * Lmm;
+          const lowerWmm = Math.floor(idealWmm / stepMm) * stepMm;
+          const upperWmm = lowerWmm + stepMm;
+          consider(lowerWmm, Lmm, HmmCandidate);
+          if (upperWmm !== lowerWmm) consider(upperWmm, Lmm, HmmCandidate);
+        }
+      });
+
+      const result = bestUnder || bestOver;
+      if (!result) return { W:0.01, L:0.01, H:targetHmm/1000, S_actual:area5faces(0.01,0.01,targetHmm/1000) };
+      return result;
+    }
+
+    // 모든 비율을 비교해 목표 면적에 가장 가까운 비율을 찾는다.
+    // 목표 이하 후보가 하나라도 있으면 그중 면적이 가장 큰 후보,
+    // 없으면 목표 초과 후보 중 면적이 가장 작은 후보를 선택한다.
+    function recommendBestRatio(Sm2, Hmm){
+      const ratios = [...$("recoRatio").options].map(option => option.value);
+      const candidates = ratios.map(ratio => ({
+        ratio,
+        result: recommendByRatioAndHeight(Sm2, ratio, Hmm)
+      }));
+      const under = candidates.filter(item => item.result.S_actual <= Sm2 + 1e-10);
+      const pool = under.length ? under : candidates;
+      pool.sort((a,b) => under.length
+        ? b.result.S_actual - a.result.S_actual
+        : a.result.S_actual - b.result.S_actual);
+      return pool[0] || null;
+    }
+
+    // 최초 기본 H(mm): 중간형 높이와 3000 중 큰 값, 10mm 스냅
+    function initialHeightMm(Sm2){
+      const x=Math.sqrt(Sm2/5);          // 균형형 높이
+      const Hmid=(x + x/2)/2;            // 균형형~저상형 중간
+      return snap10mm(Math.max(Hmid, 2.6)*1000);
+    }
+
+    function renderReco(Sm2){
+      const unit = $("recoUnit").value;
+      const ratio = $("recoRatio").value;
+      let   Hmm   = Number($("recoH").value) || 0;
+
+      if (Hmm <= 0 && Sm2 > 0){
+        Hmm = initialHeightMm(Sm2);
+        $("recoH").value = String(Hmm);
+      } else {
+        const snapped = snap10mm(Math.max(0, Hmm));
+        if (snapped !== Hmm) { Hmm = snapped; $("recoH").value = String(snapped); }
+      }
+
+      const list = $("recoList");
+      list.innerHTML = "";
+      if (!(Sm2 > 0)){
+        list.innerHTML = `<div class="muted">합계 면적이 0이면 추천을 표시할 수 없습니다.</div>`;
+        return;
+      }
+
+      const r = recommendByRatioAndHeight(Sm2, ratio, Hmm);
+
+      // 표시값 변환
+      const Wd = lenToUnit(r.W, unit);
+      const Ld = lenToUnit(r.L, unit);
+      const Hd = lenToUnit(r.H, unit);
+
+      const diff = r.S_actual - Sm2;
+      const diffPct = Sm2>0 ? (diff/Sm2)*100 : 0;
+
+      const card = document.createElement("div");
+      card.className = "reco";
+      card.innerHTML = `
+        <div class="title">
+          <div>추천 (W:L=${ratio}, 목표 H=${Hmm}mm, H ±20mm / 10mm 단위)</div>
+          <div>${Math.round(Wd)} × ${Math.round(Ld)} × ${Math.round(Hd)} ${unit}</div>
+        </div>
+        <div class="meta">
+          추천 치수의 실제 면적: <b>${r.S_actual.toFixed(4)} m²</b> · 목표: ${Sm2.toFixed(4)} m²
+          · Δ=+${diff.toFixed(4)} m² (+${diffPct.toFixed(2)}%)
+        </div>`;
+      list.appendChild(card);
+
+      const best = recommendBestRatio(Sm2, Hmm);
+      if (best){
+        const bestLine = document.createElement("div");
+        bestLine.className = "ratio-recommend";
+        bestLine.innerHTML = `전체 비율 비교 추천: <strong>${best.ratio}</strong> (실제 면적 ${best.result.S_actual.toFixed(4)} m²)`;
+        list.appendChild(bestLine);
+      }
+    }
+
+    function copyRecommendations(){
+      const Sm2 = Number(($("sumM2").textContent||"").replace(/[^\d.]/g,"")) || 0;
+      if (!(Sm2>0)) { alert("합계 면적이 0입니다."); return; }
+
+      const unit = $("recoUnit").value;
+      const ratio = $("recoRatio").value;
+      const Hmm   = Number($("recoH").value) || 0;
+
+      const r = recommendByRatioAndHeight(Sm2, ratio, Hmm);
+      const Wd = lenToUnit(r.W, unit), Ld = lenToUnit(r.L, unit), Hd = lenToUnit(r.H, unit);
+      const diff = r.S_actual - Sm2, diffPct = (diff/Sm2)*100;
+
+      const txt =
+`[동일 면적 추천치수]
+합계 S(목표) = ${Sm2.toFixed(4)} m²
+비율 W:L = ${ratio}, 목표 H = ${snap10mm(Math.max(0,Hmm))} mm (탐색 범위 ±20mm, 10mm 단위)
+W×L×H = ${Math.round(Wd)} × ${Math.round(Ld)} × ${Math.round(Hd)} ${unit}
+추천 치수의 실제 면적 = ${r.S_actual.toFixed(4)} m²
+차이(Δ) = +${diff.toFixed(4)} m² (+${diffPct.toFixed(2)}%)`;
+      navigator.clipboard?.writeText(txt).then(()=>alert("추천 치수와 실제 면적을 복사했습니다."))
+        .catch(()=>alert("복사에 실패했습니다. 브라우저 권한을 확인해주세요."));
+    }
+
+    // ===== 이벤트 =====
+    $("addBtn").onclick = addItem;
+    $("clearBtn").onclick = clearAll;
+    $("copyBtn").onclick = copyAll;
+    $("sumUnit").onchange = render;
+
+    $("recoUnit").onchange = ()=>{ const Sm2=items.reduce((s,it)=>s+it.totalM2,0); renderReco(Sm2); };
+    $("recoRatio").onchange = ()=>{ const Sm2=items.reduce((s,it)=>s+it.totalM2,0); renderReco(Sm2); };
+    $("recoH").oninput   = ()=>{ const Sm2=items.reduce((s,it)=>s+it.totalM2,0); renderReco(Sm2); };
+
+    // 엔터로 항목 추가
+    ["w","l","h","qty"].forEach(id=>{
+      $(id).addEventListener("keydown", e=>{ if(e.key==="Enter") addItem(); });
+    });
+
+    // 초기 렌더
+    render();
+  </script>
+</body>
+</html>
