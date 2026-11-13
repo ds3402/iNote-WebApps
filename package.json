@@ -1,0 +1,9 @@
+{
+  "name": "inote-webapps",
+  "version": "1.3.0",
+  "private": true,
+  "description": "iNote Web Apps portal and static web applications",
+  "scripts": {
+    "build": "node scripts/build_catalog.js"
+  }
+}

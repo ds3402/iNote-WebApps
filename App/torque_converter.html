@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torque wrench convertor v3</title>
+    <style>
+:root{
+  --bg:#ffffff;
+  --fg:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --card:#ffffff;
+  --subtle:#f8fafc;
+  --accent:#0ea5e9;
+  --accent-ink:#075985;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --orange:#f97316;
+  --red:#dc2626;
+  --shadow:0 1px 1.5px rgba(2,6,23,.05),0 4px 12px rgba(2,6,23,.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:ui-sans-serif,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,
+    "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  color:var(--fg);
+  background:var(--bg);
+  padding:0;
+}
+button,input,select{font:inherit}
+
+.container{
+  max-width:680px;
+  margin:0 auto;
+  padding:12px 12px 32px;
+}
+
+/* Header — recent apps style */
+.header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  margin:-12px -12px 12px;
+  padding:11px 16px 10px;
+  background:linear-gradient(180deg,#ffffffee,#ffffffcc);
+  backdrop-filter:saturate(180%) blur(8px);
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.title{
+  font-size:18px;
+  line-height:1.25;
+  font-weight:700;
+  letter-spacing:.15px;
+  color:var(--fg);
+}
+.subtitle{
+  margin-top:2px;
+  font-size:10px;
+  color:var(--muted);
+}
+
+/* Cards */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:var(--shadow);
+  padding:12px;
+  margin-bottom:12px;
+}
+.card-title{
+  font-size:14px;
+  line-height:1.3;
+  font-weight:700;
+  color:#334155;
+  margin-bottom:9px;
+}
+
+/* Model */
+.model-select{
+  width:100%;
+  padding:10px 12px;
+  background:var(--subtle);
+  color:var(--fg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:13px;
+  appearance:auto;
+}
+.model-select:focus{
+  outline:2px solid #93c5fd;
+  outline-offset:0;
+}
+.range-info{
+  text-align:center;
+  margin-top:7px;
+  font-size:11px;
+  color:var(--blue);
+}
+
+/* Inputs */
+.input-section{margin-bottom:0}
+.input-title{
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:7px;
+}
+.input-container{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+.torque-input{
+  flex:1;
+  min-width:0;
+  padding:11px 12px;
+  background:var(--subtle);
+  color:var(--fg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:14px;
+  outline:none;
+}
+.torque-input::placeholder{color:#9aa1aa}
+.torque-input:focus{
+  outline:2px solid #93c5fd;
+  outline-offset:0;
+}
+.unit-select{
+  flex:0 0 82px;
+  width:82px;
+  padding:11px 8px;
+  background:var(--subtle);
+  color:var(--fg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:11px;
+  font-weight:600;
+}
+.unit-select:focus{
+  outline:2px solid #93c5fd;
+  outline-offset:0;
+}
+
+/* Main calculate button */
+.convert-btn{
+  width:100%;
+  padding:11px 12px;
+  background:var(--blue);
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(37,99,235,.18);
+  transition:opacity .15s,transform .05s;
+}
+.convert-btn:hover{opacity:.9}
+.convert-btn:active{opacity:.8;transform:translateY(1px)}
+
+/* Result */
+.output-card{
+  background:#f8fafc;
+}
+.output-card .input-title{
+  color:#475569;
+}
+.output-container{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.bar-output{
+  flex:1;
+  min-width:0;
+  min-height:42px;
+  padding:8px 10px;
+  background:#fff;
+  color:var(--green);
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:17px;
+  font-weight:700;
+  text-align:center;
+  outline:none;
+}
+.output-container .unit-select{
+  background:#fff;
+}
+
+/* Status */
+.status{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+  margin:10px 0;
+  min-height:16px;
+  line-height:1.4;
+  padding:0 5px;
+}
+.status.success{color:var(--green)}
+.status.warning{color:var(--orange)}
+.status.error{color:var(--red)}
+.status.info{color:var(--blue)}
+
+/* Actions — compact chips/buttons like the other apps */
+.action-buttons{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin-top:10px;
+}
+.action-btn{
+  width:100%;
+  min-width:0;
+  padding:9px 5px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:11px;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity .15s,transform .05s;
+  text-align:center;
+}
+.action-btn:hover{opacity:.9}
+.action-btn:active{transform:translateY(1px)}
+.action-btn.table,
+.action-btn.compare{
+  background:#fff;
+  color:#334155;
+}
+.action-btn.pdf{
+  background:#fff7ed;
+  border-color:#fed7aa;
+  color:#c2410c;
+}
+.action-btn.clear{
+  background:var(--subtle);
+  color:#64748b;
+}
+
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  background:rgba(15,23,42,.28);
+  backdrop-filter:blur(4px);
+  overflow:auto;
+  padding:12px;
+}
+.modal-content{
+  width:min(100%,680px);
+  margin:4vh auto 0;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:0 12px 40px rgba(2,6,23,.16);
+  padding:12px;
+  max-height:90vh;
+  overflow:auto;
+}
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+}
+.modal-title{
+  font-size:15px;
+  font-weight:700;
+  color:var(--fg);
+}
+.close-btn{
+  width:34px;
+  height:34px;
+  padding:0;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--subtle);
+  color:#64748b;
+  font-size:18px;
+  cursor:pointer;
+}
+.table-content{
+  color:var(--fg);
+  overflow-x:auto;
+}
+.table-info{
+  background:var(--subtle);
+  padding:9px;
+  border-radius:10px;
+  margin-bottom:10px;
+  font-size:11px;
+  color:var(--muted);
+  text-align:center;
+}
+
+/* Tables */
+.conversion-table,.comparison-table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+.conversion-table{font-size:11px}
+.conversion-table th{
+  background:#eff6ff;
+  color:#1e40af;
+  padding:8px 5px;
+  text-align:center;
+  font-weight:700;
+  font-size:11px;
+  border-bottom:1px solid #dbeafe;
+}
+.conversion-table td{
+  padding:6px 5px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  color:var(--fg);
+}
+.conversion-table tr:last-child td{border-bottom:none}
+.conversion-table tr:nth-child(even),
+.comparison-table tr:nth-child(even){background:#f8fafc}
+.conversion-table tr:hover,
+.comparison-table tr:hover{background:#eff6ff}
+.torque-value{font-weight:700;color:#ea580c}
+.bar-value{font-weight:700;color:#16a34a}
+
+.comparison-table{font-size:10px}
+.comparison-table th{
+  background:#eff6ff;
+  color:#1e40af;
+  padding:6px 3px;
+  text-align:center;
+  font-weight:700;
+  font-size:10px;
+  border-bottom:1px solid #dbeafe;
+}
+.comparison-table td{
+  padding:4px 3px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  color:var(--fg);
+  font-size:10px;
+}
+.comparison-table tr:last-child td{border-bottom:none}
+.out-of-range{color:#94a3b8;font-style:italic}
+
+/* Mobile */
+@media(max-width:480px){
+  .container{width:100%;padding:0 10px 28px}
+  .header{margin:0 -10px 10px;padding:10px 14px}
+  .title{font-size:17px}
+  .card{padding:11px;margin-bottom:10px}
+  .action-buttons{gap:5px}
+  .action-btn{padding:8px 3px;font-size:10px}
+  .modal{padding:8px}
+  .modal-content{margin-top:2vh;max-height:92vh;padding:10px}
+  .comparison-table th,.comparison-table td{padding:3px 2px;font-size:9px}
+  .conversion-table th,.conversion-table td{padding:5px 3px;font-size:10px}
+}
+@media(max-width:350px){
+  .input-container{gap:6px}
+  .unit-select{flex-basis:68px;width:68px;padding:10px 5px;font-size:10px}
+  .action-btn{font-size:9px;padding:7px 2px}
+}
+</style>
+
+    <meta name="inote:title" content="유압 토크렌치 변환기">
+    <meta name="inote:description" content="유압 토크렌치의 토크와 작동 압력을 빠르게 변환합니다.">
+    <meta name="inote:category" content="Torque">
+    <meta name="inote:icon" content="🔧">
+    <meta name="inote:keywords" content="토크렌치, 유압, 압력, 토크, 변환">
+    <meta name="inote:publish" content="true">
+    <meta name="inote:version" content="1.0">
+    <meta name="inote:updated" content="2026-11-14">
+    <meta name="inote:changes" content="최초 통합 등록">
+    <meta name="inote:badge" content="">
+    <meta name="inote:badge-until" content="">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="title">Hydraulic Torque Wrench Converter</div>
+            <div class="subtitle">주식회사 유현</div>
+        </div>
+
+        <!-- 모델 선택 카드 -->
+        <div class="card">
+            <div class="card-title">모델 선택</div>
+            <select class="model-select" id="modelSelect">
+                <option value="Stealth-2">Stealth-2</option>
+                <option value="Stealth-4">Stealth-4</option>
+                <option value="Stealth-8">Stealth-8</option>
+                <option value="Stealth-14">Stealth-14</option>
+                <option value="Stealth-22">Stealth-22</option>
+                <option value="Stealth-36">Stealth-36</option>
+                <option value="MXT-.7">MXT-.7</option>
+                <option value="MXT-1">MXT-1</option>
+                <option value="MXT-3">MXT-3</option>
+                <option value="MXT-5">MXT-5</option>
+                <option value="MXT-10">MXT-10</option>
+                <option value="MXT-15">MXT-15</option>
+                <option value="MXT-20">MXT-20</option>
+                <option value="MXT-35">MXT-35</option>
+                <option value="TWHC1">TWHC1</option>
+                <option value="TWHC3">TWHC3</option>
+                <option value="TWHC6">TWHC6</option>
+                <option value="TWHC50">TWHC50</option>
+                <option value="TWSD1">TWSD1</option>
+                <option value="TWSD3">TWSD3</option>
+                <option value="TWSD6">TWSD6</option>
+                <option value="TWSD11">TWSD11</option>
+                <option value="TWSD25">TWSD25</option>
+            </select>
+            <div class="range-info" id="rangeInfo">범위: 377 - 2,534 NM</div>
+        </div>
+
+        <!-- 변환 카드 -->
+        <div class="card">
+            <div class="input-section">
+                <div class="input-title">토크값 입력</div>
+                <div class="input-container">
+                    <input type="number" class="torque-input" id="torqueInput" placeholder="토크값 입력">
+                    <select class="unit-select" id="unitSelect">
+                        <option value="NM">NM</option>
+                        <option value="KGM">KGM</option>
+                        <option value="FT.LBS">FT.LBS</option>
+                    </select>
+                </div>
+                <div class="input-title">목표 퍼센테이지</div>
+                <div class="input-container">
+                    <input type="number" class="torque-input" id="percentageInput" placeholder="퍼센테이지 입력" value="100" min="0" max="200">
+                    <div class="unit-select" style="display: flex; align-items: center; justify-content: center; font-weight: 600;">%</div>
+                </div>
+                <button class="convert-btn" onclick="convertTorque()">변환</button>
+            </div>
+        </div>
+
+        <!-- 출력 카드 -->
+        <div class="card output-card">
+            <div class="input-title">게이지값</div>
+            <div class="output-container">
+                <input type="text" class="bar-output" id="barOutput" readonly placeholder="">
+                <select class="unit-select" id="pressureUnitSelect">
+                    <option value="BAR">BAR</option>
+                    <option value="PSI">PSI</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 상태 -->
+        <div class="status" id="status">모델을 선택하고 토크값을 입력하세요</div>
+
+        <!-- 액션 버튼들 -->
+        <div class="action-buttons">
+            <button class="action-btn table" onclick="showTable()">변환표</button>
+            <button class="action-btn compare" onclick="showComparison()">비교</button>
+            <button class="action-btn pdf" onclick="openPdf()">PDF열기</button>
+            <button class="action-btn clear" onclick="clearInputs()">초기화</button>
+        </div>
+    </div>
+
+    <!-- 모달 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle"></div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="table-content" id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 모델별 토크 변환표 데이터 (값: [NM, BAR])
+        const TORQUE_TABLES = {
+            'MXT-1': [
+                [271, 104], [290, 110], [328, 124], [366, 138], [403, 152],
+                [439, 165], [476, 179], [512, 193], [549, 207], [584, 220],
+                [620, 234], [655, 248], [690, 262], [725, 276], [762, 290],
+                [798, 303], [835, 317], [872, 331], [908, 345], [945, 358],
+                [981, 372], [1018, 386], [1055, 400], [1091, 414], [1128, 427],
+                [1164, 441], [1201, 455], [1238, 468], [1274, 482], [1311, 496],
+                [1347, 510], [1384, 524], [1421, 538], [1457, 552], [1493, 565],
+                [1528, 579], [1563, 593], [1598, 607], [1634, 620], [1670, 634],
+                [1707, 648], [1743, 662], [1780, 676], [1817, 690]
+            ],
+            'MXT-3': [
+                [651, 104], [694, 110], [781, 124], [868, 138], [954, 152],
+                [1041, 165], [1128, 179], [1215, 193], [1301, 207], [1388, 220],
+                [1475, 234], [1562, 248], [1648, 262], [1735, 276], [1825, 290],
+                [1914, 303], [2004, 317], [2093, 331], [2183, 345], [2269, 358],
+                [2356, 372], [2443, 386], [2530, 400], [2616, 414], [2703, 427],
+                [2790, 441], [2877, 455], [2963, 468], [3050, 482], [3140, 496],
+                [3229, 510], [3319, 524], [3408, 538], [3497, 552], [3587, 565],
+                [3676, 579], [3766, 593], [3855, 607], [3945, 620], [4032, 634],
+                [4118, 648], [4205, 662], [4292, 676], [4379, 690]
+            ],
+            // === 신규 추가: MXT-10 (공식 PDF 값) ===
+            'MXT-10': [
+                [2295,103],[2447,110],[2752,124],[3057,138],[3375,152],
+                [3694,165],[4013,179],[4331,193],[4650,207],[4956,221],
+                [5262,234],[5569,248],[5875,262],[6182,276],[6496,290],
+                [6811,303],[7125,317],[7440,331],[7754,345],[8063,359],
+                [8372,372],[8681,386],[8990,400],[9299,414],[9617,427],
+                [9934,441],[10251,455],[10568,469],[10885,483],[11203,496],
+                [11520,510],[11837,524],[12154,538],[12472,552],[12786,565],
+                [13101,579],[13415,593],[13730,607],[14044,621],[14359,634],
+                [14673,648],[14988,662],[15302,676],[15617,689]
+            ],
+            'MXT-.7': [
+                [160,104],[171,110],[194,124],[217,138],[239,152],[262,165],[284,179],[306,193],[328,207],[351,220],[373,234],[396,248],[418,262],[441,276],[463,290],[486,303],[509,317],[532,331],[554,345],[577,358],[599,372],[621,386],[643,400],[666,414],[688,427],[711,441],[733,455],[756,468],[778,482],[801,496],[824,510],[847,524],[870,538],[893,552],[915,565],[936,579],[958,593],[979,607],[1000,620],[1023,634],[1046,648],[1069,662],[1092,676],[1114,690]
+            ],
+            'MXT-5': [
+                [1132,104],[1206,110],[1356,124],[1505,138],[1657,152],[1808,165],[1960,179],[2112,193],[2264,207],[2416,220],[2568,234],[2719,248],[2871,262],[3023,276],[3175,290],[3327,303],[3478,317],[3630,331],[3782,345],[3934,358],[4086,372],[4238,386],[4389,400],[4541,414],[4693,427],[4845,441],[4997,455],[5149,468],[5300,482],[5452,496],[5604,510],[5756,524],[5908,538],[6060,552],[6211,565],[6363,579],[6515,593],[6667,607],[6819,620],[6971,634],[7122,648],[7274,662],[7426,676],[7578,690]
+            ],
+            'MXT-15': [
+                [3075,104],[3285,110],[3704,124],[4124,138],[4542,152],[4960,165],[5378,179],[5796,193],[6214,207],[6632,220],[7050,234],[7468,248],[7886,262],[8304,276],[8726,290],[9149,303],[9571,317],[9993,331],[10415,345],[10838,358],[11262,372],[11685,386],[12108,400],[12531,414],[12955,427],[13379,441],[13803,455],[14227,468],[14651,482],[15066,496],[15480,510],[15895,524],[16309,538],[16723,552],[17146,565],[17569,579],[17991,593],[18414,607],[18837,620],[19244,634],[19652,648],[20059,662],[20467,676],[20874,690]
+            ],
+            'MXT-20': [
+                [4013,104],[4281,110],[4818,124],[5355,138],[5891,152],[6428,165],[6965,179],[7502,193],[8039,207],[8574,220],[9110,234],[9645,248],[10181,262],[10716,276],[11251,290],[11787,303],[12322,317],[12858,331],[13393,345],[13930,358],[14467,372],[15004,386],[15541,400],[16077,414],[16612,427],[17146,441],[17680,455],[18214,468],[18748,482],[19285,496],[19822,510],[20358,524],[20895,538],[21432,552],[21968,565],[22503,579],[23038,593],[23574,607],[24109,620],[24645,634],[25180,648],[25716,662],[26251,676],[26787,690]
+            ],
+            'MXT-35': [
+                [7320,104],[7825,110],[8833,124],[9842,138],[10873,152],[11905,165],[12936,179],[13968,193],[15000,207],[16019,220],[17039,234],[18058,248],[19077,262],[20097,276],[21109,290],[22122,303],[23135,317],[24147,331],[25160,345],[26171,358],[27182,372],[28194,386],[29205,400],[30216,414],[31215,427],[32214,441],[33214,455],[34213,468],[35212,482],[36216,496],[37221,510],[38225,524],[39230,538],[40234,552],[41240,565],[42246,579],[43252,593],[44258,607],[45263,620],[46269,634],[47275,648],[48281,662],[49287,676],[50293,690]
+            ],
+            'Stealth-22': [
+                [4406,104],[4707,110],[5309,124],[5910,138],[6510,152],[7109,165],[7708,179],[8307,193],[8906,207],[9489,220],[10072,234],[10655,248],[11238,262],[11821,276],[12379,290],[12938,303],[13496,317],[14055,331],[14613,345],[15244,358],[15874,372],[16504,386],[17135,400],[17765,414],[18357,427],[18949,441],[19542,455],[20134,468],[20726,482],[21323,496],[21919,510],[22516,524],[23113,538],[23709,552],[24303,565],[24897,579],[25491,593],[26084,607],[26678,620],[27273,634],[27868,648],[28464,662],[29059,676],[29654,690]
+            ],
+            'Stealth-36': [
+                [6665,104],[7123,110],[8040,124],[8956,138],[9909,152],[10861,165],[11814,179],[12766,193],[13719,207],[14659,220],[15600,234],[16541,248],[17482,262],[18423,276],[19378,290],[20333,303],[21288,317],[22244,331],[23199,345],[24155,358],[25112,372],[26069,386],[27025,400],[27982,414],[28947,427],[29912,441],[30877,455],[31843,468],[32808,482],[33774,496],[34740,510],[35706,524],[36672,538],[37638,552],[38583,565],[39528,579],[40473,593],[41418,607],[42363,620],[43304,634],[44245,648],[45186,662],[46128,676],[47069,690]
+            ],
+            'TWHC1': [
+                [230, 83],
+[268, 97],
+[306, 110],
+[345, 124],
+[383, 138],
+[421, 152],
+[460, 165],
+[498, 179],
+[536, 193],
+[574, 207],
+[613, 221],
+[651, 234],
+[689, 248],
+[728, 262],
+[766, 276],
+[804, 290],
+[842, 303],
+[881, 317],
+[919, 331],
+[957, 345],
+[996, 359],
+[1034, 372],
+[1072, 386],
+[1110, 400],
+[1149, 414],
+[1187, 427],
+[1225, 441],
+[1264, 455],
+[1302, 469],
+[1340, 483],
+[1379, 496],
+[1417, 510],
+[1455, 524],
+[1493, 538],
+[1532, 552],
+[1570, 565],
+[1608, 579],
+[1647, 593],
+[1685, 607],
+[1723, 621],
+[1761, 634],
+[1800, 648],
+[1838, 662],
+[1876, 676],
+[1915, 689],
+[1944, 700]
+            ],
+            'TWHC3': [
+                [510, 83],
+[595, 97],
+[680, 110],
+[765, 124],
+[850, 138],
+[935, 152],
+[1020, 165],
+[1105, 179],
+[1190, 193],
+[1275, 207],
+[1360, 221],
+[1445, 234],
+[1530, 248],
+[1615, 262],
+[1700, 276],
+[1785, 290],
+[1870, 303],
+[1955, 317],
+[2040, 331],
+[2125, 345],
+[2210, 359],
+[2295, 372],
+[2380, 386],
+[2465, 400],
+[2550, 414],
+[2635, 427],
+[2720, 441],
+[2805, 455],
+[2890, 469],
+[2975, 483],
+[3060, 496],
+[3144, 510],
+[3229, 524],
+[3314, 538],
+[3399, 552],
+[3484, 565],
+[3569, 579],
+[3654, 593],
+[3739, 607],
+[3824, 621],
+[3909, 634],
+[3994, 648],
+[4079, 662],
+[4164, 676],
+[4249, 689],
+[4314, 700]
+            ],
+            'TWHC6': [
+                [984, 83],
+[1148, 97],
+[1312, 110],
+[1476, 124],
+[1640, 138],
+[1804, 152],
+[1967, 165],
+[2131, 179],
+[2295, 193],
+[2459, 207],
+[2623, 221],
+[2787, 234],
+[2951, 248],
+[3115, 262],
+[3279, 276],
+[3443, 290],
+[3607, 303],
+[3771, 317],
+[3935, 331],
+[4099, 345],
+[4263, 359],
+[4427, 372],
+[4591, 386],
+[4755, 400],
+[4919, 414],
+[5083, 427],
+[5247, 441],
+[5411, 455],
+[5575, 469],
+[5738, 483],
+[5902, 496],
+[6066, 510],
+[6230, 524],
+[6394, 538],
+[6558, 552],
+[6722, 565],
+[6886, 579],
+[7050, 593],
+[7214, 607],
+[7378, 621],
+[7542, 634],
+[7706, 648],
+[7870, 662],
+[8034, 676],
+[8198, 689],
+[8323, 700]
+            ],
+            'TWHC50': [
+                [8618, 83],
+[10054, 97],
+[11491, 110],
+[12927, 124],
+[14363, 138],
+[15799, 152],
+[17236, 165],
+[18672, 179],
+[20108, 193],
+[21545, 207],
+[22981, 221],
+[24417, 234],
+[25854, 248],
+[27290, 262],
+[28726, 276],
+[30163, 290],
+[31599, 303],
+[33035, 317],
+[34472, 331],
+[35908, 345],
+[37344, 359],
+[38780, 372],
+[40217, 386],
+[41653, 400],
+[43089, 414],
+[44526, 427],
+[45962, 441],
+[47398, 455],
+[48835, 469],
+[50271, 483],
+[51707, 496],
+[53144, 510],
+[54580, 524],
+[56016, 538],
+[57453, 552],
+[58889, 565],
+[60325, 579],
+[61762, 593],
+[63198, 607],
+[64634, 621],
+[66070, 634],
+[67507, 648],
+[68943, 662],
+[70379, 676],
+[71816, 689],
+[72912, 700]
+            ],
+            'TWSD1': [
+                [211, 83],
+[247, 97],
+[282, 110],
+[317, 124],
+[352, 138],
+[388, 152],
+[423, 165],
+[458, 179],
+[493, 193],
+[528, 207],
+[564, 221],
+[599, 234],
+[634, 248],
+[669, 262],
+[705, 276],
+[740, 290],
+[775, 303],
+[810, 317],
+[846, 331],
+[881, 345],
+[916, 359],
+[951, 372],
+[986, 386],
+[1022, 400],
+[1057, 414],
+[1092, 427],
+[1127, 441],
+[1163, 455],
+[1198, 469],
+[1233, 483],
+[1268, 496],
+[1304, 510],
+[1339, 524],
+[1374, 538],
+[1409, 552],
+[1444, 565],
+[1480, 579],
+[1515, 593],
+[1550, 607],
+[1585, 621],
+[1621, 634],
+[1656, 648],
+[1691, 662],
+[1726, 676],
+[1762, 690]
+            ],
+            'TWSD3': [
+                [499, 83],
+[582, 97],
+[666, 110],
+[749, 124],
+[832, 138],
+[915, 152],
+[998, 165],
+[1082, 179],
+[1165, 193],
+[1248, 207],
+[1331, 221],
+[1414, 234],
+[1498, 248],
+[1581, 262],
+[1664, 276],
+[1747, 290],
+[1830, 303],
+[1914, 317],
+[1997, 331],
+[2080, 345],
+[2163, 359],
+[2246, 372],
+[2330, 386],
+[2413, 400],
+[2496, 414],
+[2579, 427],
+[2662, 441],
+[2746, 455],
+[2829, 469],
+[2912, 483],
+[2995, 496],
+[3078, 510],
+[3162, 524],
+[3245, 538],
+[3328, 552],
+[3411, 565],
+[3494, 579],
+[3578, 593],
+[3661, 607],
+[3744, 621],
+[3827, 634],
+[3910, 648],
+[3993, 662],
+[4077, 676],
+[4160, 690]
+            ],
+            'TWSD6': [
+                [979, 83],
+[1142, 97],
+[1305, 110],
+[1468, 124],
+[1631, 138],
+[1795, 152],
+[1958, 165],
+[2121, 179],
+[2284, 193],
+[2447, 207],
+[2610, 221],
+[2773, 234],
+[2937, 248],
+[3100, 262],
+[3263, 276],
+[3426, 290],
+[3589, 303],
+[3752, 317],
+[3915, 331],
+[4079, 345],
+[4242, 359],
+[4405, 372],
+[4568, 386],
+[4731, 400],
+[4894, 414],
+[5057, 427],
+[5221, 441],
+[5384, 455],
+[5547, 469],
+[5710, 483],
+[5873, 496],
+[6036, 510],
+[6199, 524],
+[6363, 538],
+[6526, 552],
+[6689, 565],
+[6852, 579],
+[7015, 593],
+[7178, 607],
+[7341, 621],
+[7505, 634],
+[7668, 648],
+[7831, 662],
+[7994, 676],
+[8157, 690]
+            ],
+            'TWSD11': [
+                [1779, 83],
+[2075, 97],
+[2372, 110],
+[2668, 124],
+[2965, 138],
+[3261, 152],
+[3558, 165],
+[3854, 179],
+[4151, 193],
+[4447, 207],
+[4744, 221],
+[5040, 234],
+[5337, 248],
+[5633, 262],
+[5930, 276],
+[6226, 290],
+[6522, 303],
+[6819, 317],
+[7115, 331],
+[7412, 345],
+[7708, 359],
+[8005, 372],
+[8301, 386],
+[8598, 400],
+[8894, 414],
+[9191, 427],
+[9487, 441],
+[9784, 455],
+[10080, 469],
+[10377, 483],
+[10673, 496],
+[10970, 510],
+[11266, 524],
+[11563, 538],
+[11859, 552],
+[12156, 565],
+[12452, 579],
+[12749, 593],
+[13045, 607],
+[13341, 621],
+[13638, 634],
+[13934, 648],
+[14231, 662],
+[14527, 676],
+[14824, 690]
+            ],
+            'TWSD25': [
+                [3984, 83],
+[4648, 97],
+[5312, 110],
+[5976, 124],
+[6640, 138],
+[7304, 152],
+[7967, 165],
+[8631, 179],
+[9295, 193],
+[9959, 207],
+[10623, 221],
+[11287, 234],
+[11951, 248],
+[12615, 262],
+[13279, 276],
+[13943, 290],
+[14607, 303],
+[15271, 317],
+[15935, 331],
+[16599, 345],
+[17263, 359],
+[17927, 372],
+[18591, 386],
+[19255, 400],
+[19919, 414],
+[20583, 427],
+[21247, 441],
+[21911, 455],
+[22575, 469],
+[23238, 483],
+[23902, 496],
+[24566, 510],
+[25230, 524],
+[25894, 538],
+[26558, 552],
+[27222, 565],
+[27886, 579],
+[28550, 593],
+[29214, 607],
+[29878, 621],
+[30542, 634],
+[31206, 648],
+[31870, 662],
+[32534, 676],
+[33198, 690]
+            ],
+            'Stealth-2': [
+                [377, 104], [403, 110], [456, 124], [508, 138], [559, 152],
+                [610, 165], [661, 179], [712, 193], [763, 207], [814, 220],
+                [865, 234], [915, 248], [966, 262], [1017, 276], [1067, 290],
+                [1118, 303], [1169, 317], [1220, 331], [1270, 345], [1320, 358],
+                [1371, 372], [1421, 386], [1471, 400], [1521, 414], [1572, 427],
+                [1623, 441], [1675, 455], [1726, 468], [1777, 482], [1827, 496],
+                [1877, 510], [1927, 524], [1977, 538], [2027, 552], [2077, 565],
+                [2128, 579], [2179, 593], [2229, 607], [2280, 620], [2331, 634],
+                [2382, 648], [2432, 662], [2483, 676], [2534, 690]
+            ],
+            'Stealth-4': [
+                [819, 104], [874, 110], [983, 124], [1093, 138], [1200, 152],
+                [1307, 165], [1414, 179], [1521, 193], [1628, 207], [1737, 220],
+                [1846, 234], [1954, 248], [2063, 262], [2172, 276], [2278, 290],
+                [2384, 303], [2490, 317], [2596, 331], [2702, 345], [2813, 358],
+                [2925, 372], [3036, 386], [3147, 400], [3259, 414], [3369, 427],
+                [3478, 441], [3588, 455], [3698, 468], [3808, 482], [3913, 496],
+                [4019, 510], [4124, 524], [4230, 538], [4335, 552], [4446, 565],
+                [4558, 579], [4669, 593], [4780, 607], [4891, 620], [5003, 634],
+                [5114, 648], [5226, 662], [5338, 676], [5450, 690]
+            ],
+            'Stealth-8': [
+                [1625, 104], [1730, 110], [1939, 124], [2149, 138], [2363, 152],
+                [2578, 165], [2792, 179], [3006, 193], [3221, 207], [3442, 220],
+                [3663, 234], [3884, 248], [4105, 262], [4326, 276], [4547, 290],
+                [4768, 303], [4989, 317], [5211, 331], [5432, 345], [5656, 358],
+                [5879, 372], [6103, 386], [6327, 400], [6550, 414], [6762, 427],
+                [6974, 441], [7186, 455], [7398, 468], [7610, 482], [7825, 496],
+                [8040, 510], [8255, 524], [8470, 538], [8685, 552], [8900, 565],
+                [9114, 579], [9328, 593], [9542, 607], [9756, 620], [9970, 634],
+                [10183, 648], [10396, 662], [10610, 676], [10823, 690]
+            ],
+            'Stealth-14': [
+                [2854, 104], [3047, 110], [3433, 124], [3819, 138], [4205, 152],
+                [4590, 165], [4976, 179], [5362, 193], [5748, 207], [6134, 220],
+                [6520, 234], [6906, 248], [7292, 262], [7678, 276], [8063, 290],
+                [8449, 303], [8834, 317], [9219, 331], [9604, 345], [9993, 358],
+                [10382, 372], [10771, 386], [11160, 400], [11548, 414], [11936, 427],
+                [12324, 441], [12711, 455], [13099, 468], [13487, 482], [13878, 496],
+                [14268, 510], [14659, 524], [15050, 538], [15440, 552], [15828, 565],
+                [16216, 579], [16603, 593], [16991, 607], [17379, 620], [17768, 634],
+                [18157, 648], [18546, 662], [18935, 676], [19324, 690]
+            ]
+        };
+
+        // 모델별 PDF 링크 (공식 HYTORC 변환표)
+        const PDF_LINKS = {
+            'MXT-1':  'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-1-Torque-Conversion-Chart.pdf',
+            'MXT-3':  'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-3-Torque-Conversion-Chart.pdf',
+            'MXT-10': 'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-10-Torque-Conversion-Chart.pdf',
+            'Stealth-2':  'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-2-Torque-Conversion-Chart.pdf',
+            'Stealth-4':  'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-4-Torque-Conversion-Chart.pdf',
+            'Stealth-8':  'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-8-Torque-Conversion-Chart.pdf',
+            'Stealth-14': 'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-14-Torque-Conversion-Chart.pdf',
+            'MXT-.7': 'https://www.hytorcatlantique.fr/wp-content/uploads/2019/10/abaques-de-reglages-mxt-07.pdf',
+            'MXT-5': 'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-5-Torque-Conversion-Chart.pdf',
+            'MXT-15': 'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-15-Torque-Conversion-Chart.pdf',
+            'MXT-20': 'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-20-Torque-Conversion-Chart.pdf',
+            'MXT-35': 'https://calibrations.hytorc.com/torqueCharts/mxt/MXT-35-Torque-Conversion-Chart.pdf',
+            'Stealth-22': 'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-22-Torque-Conversion-Chart.pdf',
+            'Stealth-36': 'https://calibrations.hytorc.com/torqueCharts/stealth/STEALTH-36-Torque-Conversion-Chart.pdf',
+            'TWHC1': 'https://shop.spxflow.com/medias/BS-1000623-6-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDYwOTM3MzJ8YXBwbGljYXRpb24vcGRmfHNweC1kb2NzL2g1ZC9oYmUvODkyNzYzNTk5NjcwMi5wZGZ8NTM4ODVhMDZkZjEyMTlhN2M0MzllZjdmOGY5ZmNmZTJkNDc5MzVjODViZDdlODEzZmNlMjUzZWZmZWQ0NmY2Nw',
+            'TWHC3': 'https://shop.spxflow.com/medias/BS-1000623-6-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDYwOTM3MzJ8YXBwbGljYXRpb24vcGRmfHNweC1kb2NzL2g1ZC9oYmUvODkyNzYzNTk5NjcwMi5wZGZ8NTM4ODVhMDZkZjEyMTlhN2M0MzllZjdmOGY5ZmNmZTJkNDc5MzVjODViZDdlODEzZmNlMjUzZWZmZWQ0NmY2Nw',
+            'TWHC6': 'https://shop.spxflow.com/medias/BS-1000623-6-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDYwOTM3MzJ8YXBwbGljYXRpb24vcGRmfHNweC1kb2NzL2g1ZC9oYmUvODkyNzYzNTk5NjcwMi5wZGZ8NTM4ODVhMDZkZjEyMTlhN2M0MzllZjdmOGY5ZmNmZTJkNDc5MzVjODViZDdlODEzZmNlMjUzZWZmZWQ0NmY2Nw',
+            'TWHC50': 'https://shop.spxflow.com/medias/BS-1000623-6-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDYwOTM3MzJ8YXBwbGljYXRpb24vcGRmfHNweC1kb2NzL2g1ZC9oYmUvODkyNzYzNTk5NjcwMi5wZGZ8NTM4ODVhMDZkZjEyMTlhN2M0MzllZjdmOGY5ZmNmZTJkNDc5MzVjODViZDdlODEzZmNlMjUzZWZmZWQ0NmY2Nw',
+            'TWSD1': 'https://shop.spxflow.com/medias/BS-1000528-Rev2-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDMzNDA2MDV8YXBwbGljYXRpb24vcGRmfGMzQjRMV1J2WTNNdmFESmxMMmcxWWk4NE9USTNOak0xTXpReE16UXlMbkJrWmd8MmUyOTMxOGI0NDBlNmExMDQ3MzAzOGMwY2VhZmIyNjA4MTE4M2ExMjVmNzE5Mzg5MWRjNGNmZWUyNTllN2ZmZQ',
+            'TWSD3': 'https://shop.spxflow.com/medias/BS-1000528-Rev2-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDMzNDA2MDV8YXBwbGljYXRpb24vcGRmfGMzQjRMV1J2WTNNdmFESmxMMmcxWWk4NE9USTNOak0xTXpReE16UXlMbkJrWmd8MmUyOTMxOGI0NDBlNmExMDQ3MzAzOGMwY2VhZmIyNjA4MTE4M2ExMjVmNzE5Mzg5MWRjNGNmZWUyNTllN2ZmZQ',
+            'TWSD6': 'https://shop.spxflow.com/medias/BS-1000528-Rev2-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDMzNDA2MDV8YXBwbGljYXRpb24vcGRmfGMzQjRMV1J2WTNNdmFESmxMMmcxWWk4NE9USTNOak0xTXpReE16UXlMbkJrWmd8MmUyOTMxOGI0NDBlNmExMDQ3MzAzOGMwY2VhZmIyNjA4MTE4M2ExMjVmNzE5Mzg5MWRjNGNmZWUyNTllN2ZmZQ',
+            'TWSD11': 'https://shop.spxflow.com/medias/BS-1000528-Rev2-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDMzNDA2MDV8YXBwbGljYXRpb24vcGRmfGMzQjRMV1J2WTNNdmFESmxMMmcxWWk4NE9USTNOak0xTXpReE16UXlMbkJrWmd8MmUyOTMxOGI0NDBlNmExMDQ3MzAzOGMwY2VhZmIyNjA4MTE4M2ExMjVmNzE5Mzg5MWRjNGNmZWUyNTllN2ZmZQ',
+            'TWSD25': 'https://shop.spxflow.com/medias/BS-1000528-Rev2-US.pdf?context=bWFzdGVyfHNweC1kb2NzfDMzNDA2MDV8YXBwbGljYXRpb24vcGRmfGMzQjRMV1J2WTNNdmFESmxMMmcxWWk4NE9USTNOak0xTXpReE16UXlMbkJrWmd8MmUyOTMxOGI0NDBlNmExMDQ3MzAzOGMwY2VhZmIyNjA4MTE4M2ExMjVmNzE5Mzg5MWRjNGNmZWUyNTllN2ZmZQ'
+        };
+
+
+        // 단위 변환 상수
+        const UNIT_CONVERSIONS = {
+            KGM_TO_NM: 9.80665,
+            FTLBS_TO_NM: 1.35582,
+            NM_TO_KGM: 1 / 9.80665,
+            NM_TO_FTLBS: 1 / 1.35582,
+            BAR_TO_PSI: 14.5038,
+            PSI_TO_BAR: 1 / 14.5038
+        };
+
+        // 전역 변수들
+        let currentModel = 'Stealth-2';
+        let currentTable = TORQUE_TABLES['Stealth-2'];
+        let elements = {};
+        let currentTorqueInNM = null;
+        let currentPercentage = 100;
+
+        function convertToNM(value, unit) {
+            switch(unit) {
+                case 'NM': return value;
+                case 'KGM': return value * UNIT_CONVERSIONS.KGM_TO_NM;
+                case 'FT.LBS': return value * UNIT_CONVERSIONS.FTLBS_TO_NM;
+                default: return value;
+            }
+        }
+        function convertFromNM(nmValue, unit) {
+            switch(unit) {
+                case 'NM': return nmValue;
+                case 'KGM': return nmValue * UNIT_CONVERSIONS.NM_TO_KGM;
+                case 'FT.LBS': return nmValue * UNIT_CONVERSIONS.NM_TO_FTLBS;
+                default: return nmValue;
+            }
+        }
+        function convertPressureFromBAR(barValue, unit) {
+            switch(unit) {
+                case 'BAR': return barValue;
+                case 'PSI': return barValue * UNIT_CONVERSIONS.BAR_TO_PSI;
+                default: return barValue;
+            }
+        }
+
+        function updateTorqueInputUnit(newUnit) {
+            if (currentTorqueInNM !== null && elements.torqueInput.value) {
+                const convertedValue = convertFromNM(currentTorqueInNM, newUnit);
+                elements.torqueInput.value = convertedValue.toFixed(newUnit === 'NM' ? 0 : 1);
+            }
+        }
+
+        function updateRangeInfo() {
+            const selectedUnit = elements.unitSelect.value;
+            const table = currentTable;
+            const minTorqueNM = table[0][0];
+            const maxTorqueNM = table[table.length - 1][0];
+            const minTorque = convertFromNM(minTorqueNM, selectedUnit);
+            const maxTorque = convertFromNM(maxTorqueNM, selectedUnit);
+            elements.rangeInfo.textContent = '범위: ' +
+                minTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + ' - ' +
+                maxTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + ' ' + selectedUnit;
+        }
+
+        function initializeApp() {
+            elements = {
+                modelSelect: document.getElementById('modelSelect'),
+                rangeInfo: document.getElementById('rangeInfo'),
+                torqueInput: document.getElementById('torqueInput'),
+                percentageInput: document.getElementById('percentageInput'),
+                unitSelect: document.getElementById('unitSelect'),
+                barOutput: document.getElementById('barOutput'),
+                pressureUnitSelect: document.getElementById('pressureUnitSelect'),
+                status: document.getElementById('status'),
+                modal: document.getElementById('modal'),
+                modalTitle: document.getElementById('modalTitle'),
+                modalContent: document.getElementById('modalContent')
+            };
+            setupEventListeners();
+            updateRangeInfo();
+            setStatus('모델을 선택하고 토크값을 입력하세요');
+        }
+
+        function setupEventListeners() {
+            elements.modelSelect.addEventListener('change', function() {
+                currentModel = this.value;
+                currentTable = TORQUE_TABLES[currentModel];
+                updateRangeInfo();
+                setStatus(currentModel + ' 모델이 선택되었습니다', 'info');
+                clearInputs();
+            });
+
+            elements.torqueInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertTorque();
+            });
+            elements.percentageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertTorque();
+            });
+            elements.percentageInput.addEventListener('input', function() {
+                currentPercentage = parseFloat(this.value) || 100;
+                if (elements.torqueInput.value) convertTorque();
+            });
+            elements.unitSelect.addEventListener('change', function() {
+                updateTorqueInputUnit(this.value);
+                updateRangeInfo();
+                if (elements.torqueInput.value) convertTorque();
+            });
+            elements.pressureUnitSelect.addEventListener('change', function() {
+                if (elements.barOutput.value) convertTorque();
+            });
+            elements.modal.addEventListener('click', function(e) {
+                if (e.target === elements.modal) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        function convertTorque() {
+            const inputValue = parseFloat(elements.torqueInput.value);
+            const selectedUnit = elements.unitSelect.value;
+            const pressureUnit = elements.pressureUnitSelect.value;
+            const percentage = parseFloat(elements.percentageInput.value) || 100;
+
+            if (!inputValue || isNaN(inputValue)) {
+                setStatus('⚠️ 토크값을 입력해주세요', 'warning'); elements.barOutput.value = ''; return;
+            }
+            if (inputValue < 0) {
+                setStatus('⚠️ 토크값은 0 이상이어야 합니다', 'error'); elements.barOutput.value = ''; return;
+            }
+            if (percentage < 0 || percentage > 200) {
+                setStatus('⚠️ 퍼센테이지는 0~200% 범위여야 합니다', 'error'); elements.barOutput.value = ''; return;
+            }
+
+            const torqueValueInNM = convertToNM(inputValue, selectedUnit);
+            const adjustedTorqueInNM = torqueValueInNM * (percentage / 100);
+            currentTorqueInNM = adjustedTorqueInNM;
+            const barValue = calculateBarValue(adjustedTorqueInNM);
+
+            if (barValue === -1) {
+                const maxTorqueNM = currentTable[currentTable.length - 1][0];
+                const minTorqueNM = currentTable[0][0];
+                const minTorque = convertFromNM(minTorqueNM, selectedUnit);
+                const maxTorque = convertFromNM(maxTorqueNM, selectedUnit);
+                setStatus('⚠️ 변환 범위를 벗어났습니다 (' +
+                    minTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + ' - ' +
+                    maxTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + ' ' + selectedUnit + ')', 'error');
+                elements.barOutput.value = '';
+            } else {
+                const convertedPressure = convertPressureFromBAR(barValue, pressureUnit);
+                elements.barOutput.value = convertedPressure.toFixed(1);
+
+                let torqueDisplay = selectedUnit === 'NM'
+                    ? inputValue.toLocaleString() + ' ' + selectedUnit
+                    : inputValue.toLocaleString() + ' ' + selectedUnit + ' (' + torqueValueInNM.toFixed(1) + ' NM)';
+
+                if (percentage !== 100) {
+                    torqueDisplay += ' × ' + percentage + '% = ' + adjustedTorqueInNM.toFixed(1) + ' NM';
+                }
+                setStatus('✓ 변환 완료: ' + torqueDisplay + ' → ' + convertedPressure.toFixed(1) + ' ' + pressureUnit, 'success');
+            }
+        }
+
+        // BAR 값 계산 (선형 보간)
+        function calculateBarValue(torque) {
+            const table = currentTable;
+            if (torque < table[0][0] || torque > table[table.length - 1][0]) return -1;
+
+            for (let i = 0; i < table.length; i++) {
+                if (table[i][0] === torque) return table[i][1];
+            }
+            for (let i = 0; i < table.length - 1; i++) {
+                if (torque >= table[i][0] && torque <= table[i + 1][0]) {
+                    const x1 = table[i][0], y1 = table[i][1];
+                    const x2 = table[i + 1][0], y2 = table[i + 1][1];
+                    return y1 + (torque - x1) * (y2 - y1) / (x2 - x1);
+                }
+            }
+            return -1;
+        }
+
+        function setStatus(message, type) {
+            elements.status.textContent = message;
+            elements.status.className = 'status' + (type ? ' ' + type : '');
+        }
+
+        function clearInputs() {
+            elements.torqueInput.value = '';
+            elements.percentageInput.value = '100';
+            elements.barOutput.value = '';
+            currentTorqueInNM = null;
+            currentPercentage = 100;
+            setStatus('토크값을 입력해주세요');
+        }
+
+        function showTable() {
+            const selectedTorqueUnit = elements.unitSelect.value;
+            const pressureUnit = elements.pressureUnitSelect.value;
+            let html = '<div class="table-info">💡 총 ' + currentTable.length + '개의 변환 데이터 포인트</div>';
+            html += '<table class="conversion-table">';
+            html += '<thead><tr><th>순번</th><th>토크 (' + selectedTorqueUnit + ')</th><th>게이지 (' + pressureUnit + ')</th></tr></thead>';
+            html += '<tbody>';
+
+            for (let i = 0; i < currentTable.length; i++) {
+                const torqueNM = currentTable[i][0];
+                const barValue = currentTable[i][1];
+                const convertedTorque = convertFromNM(torqueNM, selectedTorqueUnit);
+                const convertedPressure = convertPressureFromBAR(barValue, pressureUnit);
+
+                html += '<tr>';
+                html += '<td>' + (i + 1) + '</td>';
+                html += '<td class="torque-value">' + convertedTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + '</td>';
+                html += '<td class="bar-value">' + convertedPressure.toFixed(1) + '</td>';
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            showModal('📊 ' + currentModel + ' 변환표', html);
+        }
+
+        function showComparison() {
+            const selectedTorqueUnit = elements.unitSelect.value;
+            const pressureUnit = elements.pressureUnitSelect.value;
+
+            // 비교 대상 모델 (여기에 MXT-10 추가)
+            const models = ['Stealth-2', 'Stealth-4', 'Stealth-8', 'Stealth-14', 'Stealth-22', 'Stealth-36', 'MXT-.7', 'MXT-1', 'MXT-3', 'MXT-5', 'MXT-10', 'MXT-15', 'MXT-20', 'MXT-35', 'TWHC1', 'TWHC3', 'TWHC6', 'TWHC50', 'TWSD1', 'TWSD3', 'TWSD6', 'TWSD11', 'TWSD25'];
+
+            let html = '<div class="table-info">🔍 ' + models.length + '개 모델의 동일 토크값 비교 분석 (' + pressureUnit + ' 단위)</div>';
+            html += '<table class="comparison-table"><thead><tr>';
+            html += '<th>토크 (' + selectedTorqueUnit + ')</th>';
+
+            for (let k = 0; k < models.length; k++) {
+                const modelTable = TORQUE_TABLES[models[k]];
+                const minTorque = convertFromNM(modelTable[0][0], selectedTorqueUnit);
+                const maxTorque = convertFromNM(modelTable[modelTable.length - 1][0], selectedTorqueUnit);
+                html += '<th>' + models[k] + '<br><small>' +
+                    minTorque.toLocaleString(undefined, {maximumFractionDigits: 0}) + '~' +
+                    maxTorque.toLocaleString(undefined, {maximumFractionDigits: 0}) + '</small></th>';
+            }
+            html += '</tr></thead><tbody>';
+
+            const commonTorquesNM = [500, 1000, 1500, 2000, 3000, 4000, 5000,
+                                     6000, 7000, 8000, 9000, 10000, 11000,
+                                     12000, 13000, 14000, 15000, 16000, 17000];
+
+            for (let i = 0; i < commonTorquesNM.length; i++) {
+                const torqueNM = commonTorquesNM[i];
+                const convertedTorque = convertFromNM(torqueNM, selectedTorqueUnit);
+                html += '<tr><td class="torque-value">' + convertedTorque.toLocaleString(undefined, {maximumFractionDigits: 1}) + '</td>';
+
+                for (let j = 0; j < models.length; j++) {
+                    const barValue = getBarValueForModel(torqueNM, TORQUE_TABLES[models[j]]);
+                    if (barValue === -1) {
+                        html += '<td class="out-of-range">범위초과</td>';
+                    } else {
+                        const convertedPressure = convertPressureFromBAR(barValue, pressureUnit);
+                        html += '<td class="bar-value">' + convertedPressure.toFixed(1) + '</td>';
+                    }
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            showModal('🔍 모델별 비교', html);
+        }
+
+        function openPdf() {
+            const pdfUrl = PDF_LINKS[currentModel];
+            if (pdfUrl && pdfUrl.trim() !== '') {
+                try {
+                    const newWindow = window.open(pdfUrl, '_blank');
+                    if (newWindow) {
+                        setStatus('📄 ' + currentModel + ' PDF 변환표를 열었습니다', 'info');
+                    } else {
+                        setStatus('⚠️ 팝업이 차단되었습니다. 브라우저 설정을 확인해주세요', 'warning');
+                        if (confirm('팝업이 차단되어 PDF를 열 수 없습니다.\n직접 링크로 이동하시겠습니까?\n\n' + pdfUrl)) {
+                            window.location.href = pdfUrl;
+                        }
+                    }
+                } catch (error) {
+                    setStatus('❌ PDF 열기에 실패했습니다: ' + error.message, 'error');
+                }
+            } else {
+                setStatus('⚠️ ' + currentModel + ' 모델의 PDF 링크가 아직 등록되지 않았습니다', 'warning');
+            }
+        }
+
+        function getBarValueForModel(torque, table) {
+            if (torque < table[0][0] || torque > table[table.length - 1][0]) return -1;
+            for (let i = 0; i < table.length; i++) if (table[i][0] === torque) return table[i][1];
+            for (let i = 0; i < table.length - 1; i++) {
+                if (torque >= table[i][0] && torque <= table[i + 1][0]) {
+                    const x1 = table[i][0], y1 = table[i][1];
+                    const x2 = table[i + 1][0], y2 = table[i + 1][1];
+                    return y1 + (torque - x1) * (y2 - y1) / (x2 - x1);
+                }
+            }
+            return -1;
+        }
+
+        function showModal(title, htmlContent) {
+            elements.modalTitle.textContent = title;
+            elements.modalContent.innerHTML = htmlContent;
+            elements.modal.style.display = 'block';
+        }
+        function closeModal() { elements.modal.style.display = 'none'; }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
