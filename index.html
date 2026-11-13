@@ -95,6 +95,23 @@
     .grid.list-view .card-bottom{grid-column:3;grid-row:1 / span 2;margin:0;padding:0;gap:12px}
     .grid.list-view .launch{display:none}
     :root[data-theme="dark"] .header-action{background:#202d40;border-color:#3a4b63;color:#e7edf7}
+    .card-actions{display:flex;align-items:center;gap:10px}
+    .history-link{border:0;background:transparent;color:var(--blue);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:5px 0}
+    .app-open{font-size:11px;color:var(--blue);font-weight:700}
+    .history-dialog{width:min(520px,calc(100% - 28px));max-height:min(78vh,680px);border:1px solid var(--line);border-radius:18px;padding:0;background:var(--white);color:var(--ink);box-shadow:0 24px 70px #102a4b33}
+    .history-dialog::backdrop{background:#10243b88;backdrop-filter:blur(3px)}
+    .history-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+    .history-head h3{margin:0;font-size:16px}
+    .history-close{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:18px}
+    .history-body{padding:18px 22px 22px;overflow:auto;max-height:calc(78vh - 70px)}
+    .history-entry{position:relative;padding:0 0 18px 18px;border-left:2px solid #d8e7f8;margin-left:5px}
+    .history-entry:last-child{padding-bottom:0;border-left-color:transparent}
+    .history-entry:before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 3px #e8f2ff}
+    .history-version{font-size:13px;font-weight:800}.history-date{font-size:11px;color:var(--muted);margin-left:7px}
+    .history-entry ul{margin:7px 0 0;padding-left:17px;color:var(--muted);font-size:12px;line-height:1.7}
+    :root[data-theme="dark"] .history-entry{border-left-color:#405775}
+    :root[data-theme="dark"] .history-entry:before{box-shadow:0 0 0 3px #263c58}
+    :root[data-theme="dark"] .history-entry:last-child{border-left-color:transparent}
     @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-note{display:none}}
     @media(max-width:520px){.shell{width:min(100% - 26px,1120px)}.topbar{height:66px}.brand{font-size:18px}.brand-mark{width:38px;height:38px}.hero{padding:23px 19px;border-radius:18px;margin-top:10px}.hero p{font-size:12px}.grid{gap:9px}.card{padding:14px;min-height:145px}.card h3{font-size:13px}.card p{font-size:11px}.app-icon{width:38px;height:38px;font-size:20px}}
     @media(max-width:350px){.grid{grid-template-columns:1fr}}
@@ -131,6 +148,10 @@
     </main>
     <footer>© iNote Web Apps · Built for everyday work</footer>
   </div>
+  <dialog class="history-dialog" id="historyDialog" aria-labelledby="historyTitle">
+    <div class="history-head"><h3 id="historyTitle">업데이트 내역</h3><button class="history-close" id="historyClose" type="button" aria-label="닫기">×</button></div>
+    <div class="history-body" id="historyBody"></div>
+  </dialog>
   <script>
     const state = { apps: [], category: "전체", query: "", view: "card" };
     try { state.view = localStorage.getItem("inote-view") === "list" ? "list" : "card"; } catch (_) {}
@@ -211,15 +232,30 @@
         return categoryMatch && (!query || haystack.includes(query));
       });
       $("#apps").innerHTML = filtered.map(app => `
-        <a class="card" href="${escapeHtml(app.url)}">
-          <div class="card-top"><span class="app-icon">${escapeHtml(app.icon)}</span><span class="launch" aria-hidden="true">↗</span></div>
+        <article class="card">
+          <div class="card-top"><span class="app-icon">${escapeHtml(app.icon)}</span><a class="launch" href="${escapeHtml(app.url)}" aria-label="${escapeHtml(app.title)} 열기">↗</a></div>
           <div class="card-title-row"><h3>${escapeHtml(app.title)}</h3>${getReleaseBadge(app)}</div>
           <p>${escapeHtml(app.description)}</p>
-          <div class="card-bottom"><span class="tag">${escapeHtml(app.category)}</span><span class="open-label">열기 →</span></div>
-        </a>`).join("");
+          <div class="card-bottom"><span class="tag">${escapeHtml(app.category)} · v${escapeHtml(app.version || "1.0")}</span><div class="card-actions"><button class="history-link" type="button" data-history="${escapeHtml(app.file)}">업데이트 내역</button><a class="app-open" href="${escapeHtml(app.url)}">열기 →</a></div></div>
+        </article>`).join("");
       $("#count").textContent = `${filtered.length} / ${state.apps.length}개`;
       $("#empty").style.display = filtered.length ? "none" : "block";
     }
+    const historyDialog = $("#historyDialog");
+    $("#historyClose").addEventListener("click", () => historyDialog.close());
+    historyDialog.addEventListener("click", event => { if (event.target === historyDialog) historyDialog.close(); });
+    $("#apps").addEventListener("click", event => {
+      const button = event.target.closest("[data-history]");
+      if (!button) return;
+      const app = state.apps.find(item => item.file === button.dataset.history);
+      if (!app) return;
+      $("#historyTitle").textContent = `${app.title} · 업데이트 내역`;
+      const entries = Array.isArray(app.history) ? app.history : [];
+      $("#historyBody").innerHTML = entries.length ? entries.map((entry, index) => `
+        <section class="history-entry"><div><span class="history-version">v${escapeHtml(entry.version)}</span>${index === 0 ? '<span class="release-badge update">현재 버전</span>' : ''}<span class="history-date">${escapeHtml(entry.date || "")}</span></div>
+        <ul>${(entry.changes || []).map(change => `<li>${escapeHtml(change)}</li>`).join("")}</ul></section>`).join("") : '<p style="color:var(--muted);font-size:13px">등록된 업데이트 내역이 없습니다.</p>';
+      historyDialog.showModal();
+    });
     $("#filters").addEventListener("click", event => {
       const button = event.target.closest("[data-category]");
       if (!button) return;

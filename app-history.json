@@ -1,0 +1,75 @@
+{
+  "torque_converter.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "torque_extension_calculator.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "resin_calculator.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "bolt_length_calculator.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "triangle_solver.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "unit_converter.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ],
+  "pack_cover_calculator.html": [
+    {
+      "version": "1.1",
+      "date": "2026-11-14",
+      "changes": [
+        "입력 예시를 mm 기준으로 정리",
+        "숫자 천 단위 구분 표시",
+        "추천 치수 탐색 정밀도 개선",
+        "전체 비율 비교 추천 추가"
+      ]
+    },
+    {
+      "version": "1.0",
+      "date": "2026-11-14",
+      "changes": [
+        "최초 통합 등록"
+      ]
+    }
+  ]
+}

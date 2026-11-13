@@ -11,6 +11,8 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const APP_ROOT = path.join(ROOT, "App");
 const OUTPUT = path.join(ROOT, "apps.json");
+const HISTORY_FILE = path.join(ROOT, "app-history.json");
+const APP_HISTORY = fs.existsSync(HISTORY_FILE) ? JSON.parse(fs.readFileSync(HISTORY_FILE, "utf8")) : {};
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -59,6 +61,7 @@ const apps = walk(APP_ROOT).map((file) => {
     version: getMeta(source, "version"),
     updated: getMeta(source, "updated"),
     changes: getMeta(source, "changes"),
+    history: APP_HISTORY[path.basename(file)] || [],
     badge: getMeta(source, "badge").toLowerCase(),
     badgeUntil: getMeta(source, "badge-until"),
     url: relativeUrl(file),
