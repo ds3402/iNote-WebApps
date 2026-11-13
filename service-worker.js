@@ -1,4 +1,4 @@
-const CACHE_NAME = "inote-webapps-v1.3.0";
+const CACHE_NAME = "inote-webapps-v1.3.1";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -10,7 +10,6 @@ const PRECACHE_URLS = [
   "./App/triangle_solver.html",
   "./App/pack_cover_calculator.html",
   "./App/bolt_length_calculator.html",
-  "./App/text_converter.html",
   "./App/unit_converter.html",
   "./App/torque_converter.html",
   "./App/torque_extension_calculator.html"
