@@ -72,6 +72,15 @@
     <meta name="inote:changes" content="PNG 저장 기능 제거, 정삼각형 구성도 및 각도·변 표시 정렬 개선, 각도 숫자 표시 제거, 꼭짓점 C 라벨 간격 조정, 구성도 하단 안내 문구 제거, 상단 단위 토글을 별도 행으로 배치">
     <meta name="inote:badge" content="update">
     <meta name="inote:badge-until" content="2026-11-28">
+<style id="inote-app-version-style">
+  footer .app-version{
+    display:inline-block;
+    margin-top:3px;
+    color:#8292a8;
+    font-size:11px;
+    line-height:1.5;
+  }
+</style>
 </head>
 <body>
   <header>
@@ -145,7 +154,7 @@
     <div style="height:64px"></div>
   </main>
 
-  <footer><div class="inner">© <span id="yy"></span> Triangle Solver</div></footer>
+  <footer><div class="inner">© <span id="yy"></span> Triangle Solver<br><span class="app-version">iNote Web Apps · v1.1</span></div></footer>
 
 <script>
 (function(){
@@ -532,10 +541,5 @@
 })();
 </script>
 
-<style>
-  #inote-version-footer{margin:24px auto 12px;padding:8px 12px;max-width:100%;text-align:center;color:#8292a8;font:11px "Malgun Gothic","맑은 고딕",sans-serif;}
-  #inote-version-footer span{display:inline-block;padding:4px 9px;border:1px solid #e2eaf3;border-radius:999px;background:#f7faff;}
-</style>
-<div id="inote-version-footer"><span>iNote Web Apps · v1.1</span></div>
 </body>
 </html>
