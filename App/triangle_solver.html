@@ -69,7 +69,7 @@
     <meta name="inote:publish" content="true">
     <meta name="inote:version" content="1.1">
     <meta name="inote:updated" content="2026-11-14">
-    <meta name="inote:changes" content="PNG 저장 기능 제거, 삼각형 구성도를 색상과 각도 표시로 직관적으로 개선">
+    <meta name="inote:changes" content="PNG 저장 기능 제거, 정삼각형 구성도로 도형 비율 수정, 꼭짓점 및 각도 호·변 표시 위치 정렬 개선">
     <meta name="inote:badge" content="update">
     <meta name="inote:badge-until" content="2026-11-28">
 </head>
@@ -216,77 +216,87 @@
   // --- Diagram ---
   function drawDiagram(){
     const svg = document.getElementById('tri-svg');
-    svg.setAttribute('viewBox', '0 0 520 320');
+    svg.setAttribute('viewBox', '0 0 520 360');
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', '삼각형의 꼭짓점 A, B, C와 각 A, B, C 및 마주 보는 변 a, b, c를 나타내는 구성도');
+    svg.setAttribute('aria-label', '정삼각형 구성도. 세 변의 길이와 세 내각이 모두 같은 형태이며 각 A, B, C와 맞은편 변 a, b, c를 표시합니다.');
     svg.innerHTML = `
       <defs>
-        <linearGradient id="triFill" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#dbeafe"/>
-          <stop offset="100%" stop-color="#eff6ff"/>
+        <linearGradient id="triFill" x1="0" y1="0" x2="0.9" y2="1">
+          <stop offset="0%" stop-color="#eaf3ff"/>
+          <stop offset="100%" stop-color="#f5f9ff"/>
         </linearGradient>
-        <linearGradient id="triStroke" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="triLine" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#2563eb"/>
           <stop offset="100%" stop-color="#0ea5e9"/>
         </linearGradient>
-        <filter id="triShadow" x="-20%" y="-20%" width="140%" height="150%">
-          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#2563eb" flood-opacity=".12"/>
+        <filter id="triShadow" x="-15%" y="-15%" width="130%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#1d4ed8" flood-opacity=".12"/>
         </filter>
       </defs>
 
-      <!-- soft guide lines -->
-      <path d="M40 270 H480" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4 8"/>
-      <path d="M260 24 V286" stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="4 8"/>
-
-      <!-- triangle body -->
-      <path d="M112 250 L408 250 L286 54 Z"
-            fill="url(#triFill)" stroke="url(#triStroke)" stroke-width="5"
+      <!-- Equilateral triangle: all three sides are exactly 320 SVG units -->
+      <path d="M100 300 L420 300 L260 22.871 L100 300 Z"
+            fill="url(#triFill)" stroke="url(#triLine)" stroke-width="5"
             stroke-linejoin="round" filter="url(#triShadow)"/>
 
-      <!-- angle arcs -->
-      <path d="M150 250 A38 38 0 0 0 132 218" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M370 250 A38 38 0 0 1 390 218" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M269 82 A35 35 0 0 1 303 84" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-
-      <!-- angle labels -->
-      <g font-family="Malgun Gothic, sans-serif" font-size="17" font-weight="700" fill="#b45309">
-        <text x="163" y="229">A</text>
-        <text x="357" y="229">B</text>
-        <text x="286" y="111">C</text>
+      <!-- Equal-side tick marks, centered and perpendicular to each side -->
+      <g stroke="#2563eb" stroke-width="3.5" stroke-linecap="round">
+        <path d="M260 291 L260 309"/>
+        <path d="M176 153 L191 162"/>
+        <path d="M329 162 L344 153"/>
       </g>
 
-      <!-- side label pills: a opposite A, b opposite B, c opposite C -->
-      <g font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="700" text-anchor="middle">
-        <g transform="translate(365 146)">
-          <rect x="-23" y="-17" width="46" height="34" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+      <!-- Interior angle arcs, all drawn inside the triangle -->
+      <g fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round">
+        <path d="M142 300 A42 42 0 0 0 121 263.627"/>
+        <path d="M399 263.627 A42 42 0 0 0 378 300"/>
+        <path d="M281 59.244 A42 42 0 0 1 239 59.244"/>
+      </g>
+
+      <!-- Angle labels positioned just inside each angle arc -->
+      <g font-family="Malgun Gothic, sans-serif" font-size="16" font-weight="800"
+         fill="#b45309" text-anchor="middle">
+        <text x="153" y="276">A</text>
+        <text x="367" y="276">B</text>
+        <text x="260" y="91">C</text>
+      </g>
+
+      <!-- Side labels outside the triangle, centered on each side -->
+      <g font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="800"
+         text-anchor="middle">
+        <g transform="translate(365 153)">
+          <rect x="-21" y="-17" width="42" height="34" rx="12"
+                fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
           <text y="6" fill="#1d4ed8">a</text>
         </g>
-        <g transform="translate(177 146)">
-          <rect x="-23" y="-17" width="46" height="34" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <g transform="translate(155 153)">
+          <rect x="-21" y="-17" width="42" height="34" rx="12"
+                fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
           <text y="6" fill="#1d4ed8">b</text>
         </g>
-        <g transform="translate(260 274)">
-          <rect x="-23" y="-17" width="46" height="34" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <g transform="translate(260 326)">
+          <rect x="-21" y="-17" width="42" height="34" rx="12"
+                fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
           <text y="6" fill="#1d4ed8">c</text>
         </g>
       </g>
 
-      <!-- vertex markers and labels -->
+      <!-- Vertex dots and labels -->
       <g>
-        <circle cx="112" cy="250" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="4"/>
-        <circle cx="408" cy="250" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="4"/>
-        <circle cx="286" cy="54" r="7" fill="#ffffff" stroke="#2563eb" stroke-width="4"/>
-        <g font-family="Malgun Gothic, sans-serif" font-size="19" font-weight="800" fill="#0f172a">
-          <text x="83" y="278">A</text>
-          <text x="417" y="278">B</text>
-          <text x="278" y="31">C</text>
+        <circle cx="100" cy="300" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="420" cy="300" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="260" cy="22.871" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <g font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="800" fill="#0f172a">
+          <text x="76" y="322">A</text>
+          <text x="430" y="322">B</text>
+          <text x="260" y="14" text-anchor="middle">C</text>
         </g>
       </g>
 
-      <!-- relationship note -->
-      <g font-family="Malgun Gothic, sans-serif" font-size="13" fill="#64748b" text-anchor="middle">
-        <text x="260" y="309">소문자 변은 같은 대문자 각의 맞은편 변입니다</text>
-      </g>
+      <text x="260" y="353" text-anchor="middle"
+            font-family="Malgun Gothic, sans-serif" font-size="12" fill="#64748b">
+        설명용 정삼각형 · 실제 계산 결과는 입력값 기준
+      </text>
     `;
   }
 

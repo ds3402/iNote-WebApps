@@ -1,6 +1,6 @@
 {
   "name": "inote-webapps",
-  "version": "1.3.6",
+  "version": "1.3.8",
   "private": true,
   "description": "iNote Web Apps portal and static web applications",
   "scripts": {
