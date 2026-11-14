@@ -27,6 +27,31 @@
     <meta name="inote:changes" content="최초 통합 등록">
     <meta name="inote:badge" content="">
     <meta name="inote:badge-until" content="">
+
+  <style id="inote-layout-fix">
+    html, body { width:100%; min-height:100%; }
+    body {
+      display:flex !important;
+      justify-content:center !important;
+      align-items:flex-start !important;
+      box-sizing:border-box;
+      min-height:100vh;
+      width:100%;
+      margin:0 auto;
+      padding:16px;
+    }
+    body > div {
+      width:100%;
+      max-width:28rem;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      flex:0 1 28rem;
+    }
+    @media (max-width:480px) {
+      body { padding:8px; }
+    }
+  </style>
+
 </head>
 
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -286,7 +311,7 @@ let currentLanguage = 'ko';
 
 const I18N = {
   ko: {
-    appTitle: '🔧 Torque Extension Calculator v2',
+    appTitle: '🔧 Torque Extension Calculator',
     company: 'by 주식회사 유현',
     modeTarget: '설정값 계산',
     modeActual: '실제 토크 계산',
@@ -364,7 +389,7 @@ const I18N = {
   },
 
   en: {
-    appTitle: '🔧 Torque Extension Calculator v2',
+    appTitle: '🔧 Torque Extension Calculator',
     company: 'by Yuhyun Co., Ltd.',
     modeTarget: 'Set Torque',
     modeActual: 'Actual Torque',

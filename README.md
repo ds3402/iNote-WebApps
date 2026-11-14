@@ -84,3 +84,9 @@ npm run build
 - Removed the separate “열기” action from app cards.
 - Made the full app card clickable and keyboard accessible.
 - Kept the “업데이트 내역” control independent so it opens history without launching the app.
+
+
+## v1.3.4 변경 사항
+- 토크렌치 연장바 계산기 화면을 브라우저 가로 중앙에 배치하도록 레이아웃 보정
+- 각 앱 내부 제목과 문서 제목에 남아 있던 과거 v2/v3 표기를 제거
+- 각 앱의 버전 표시는 통합 메타데이터 및 하단 iNote Web Apps 버전 표시를 기준으로 통일
