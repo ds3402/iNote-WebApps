@@ -32,20 +32,29 @@
     html, body { width:100%; min-height:100%; }
     body {
       display:flex !important;
-      justify-content:center !important;
-      align-items:flex-start !important;
+      flex-direction:column !important;
+      justify-content:flex-start !important;
+      align-items:center !important;
       box-sizing:border-box;
       min-height:100vh;
       width:100%;
-      margin:0 auto;
+      margin:0;
       padding:16px;
     }
-    body > div {
+    /* 계산기 본체만 중앙 정렬하고, 하단 버전 표시는 별도 행으로 배치 */
+    body > div:first-child {
+      display:block;
       width:100%;
       max-width:28rem;
-      margin-left:auto !important;
-      margin-right:auto !important;
-      flex:0 1 28rem;
+      margin:0 auto !important;
+      flex:0 0 auto;
+    }
+    #inote-version-footer {
+      width:auto;
+      max-width:100%;
+      margin:24px auto 12px !important;
+      flex:0 0 auto;
+      align-self:center;
     }
     @media (max-width:480px) {
       body { padding:8px; }
