@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T13:33:25.733Z",
+  "generatedAt": "2026-11-14T13:43:42.661Z",
   "count": 7,
   "apps": [
     {
@@ -105,10 +105,18 @@
       "category": "Engineering",
       "icon": "📐",
       "keywords": "삼각형, 삼각함수, 변, 각도, 넓이",
-      "version": "1.0",
+      "version": "1.1",
       "updated": "2026-11-14",
-      "changes": "최초 통합 등록",
+      "changes": "PNG 저장 기능 제거, 삼각형 구성도를 색상과 각도 표시로 직관적으로 개선",
       "history": [
+        {
+          "version": "1.1",
+          "date": "2026-11-14",
+          "changes": [
+            "PNG 저장 기능 제거",
+            "삼각형 구성도를 색상과 각도 표시로 직관적으로 개선"
+          ]
+        },
         {
           "version": "1.0",
           "date": "2026-11-14",
@@ -117,8 +125,8 @@
           ]
         }
       ],
-      "badge": "",
-      "badgeUntil": "",
+      "badge": "update",
+      "badgeUntil": "2026-11-28",
       "url": "App/triangle_solver.html",
       "file": "triangle_solver.html"
     },

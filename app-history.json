@@ -37,6 +37,14 @@
   ],
   "triangle_solver.html": [
     {
+      "version": "1.1",
+      "date": "2026-11-14",
+      "changes": [
+        "PNG 저장 기능 제거",
+        "삼각형 구성도를 색상과 각도 표시로 직관적으로 개선"
+      ]
+    },
+    {
       "version": "1.0",
       "date": "2026-11-14",
       "changes": [
