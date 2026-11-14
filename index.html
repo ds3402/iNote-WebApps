@@ -48,11 +48,11 @@
     .filter:hover{border-color:#a9c9ed;color:var(--blue)}
     .filter.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
     .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-    .card{min-height:150px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;display:flex;flex-direction:column;transition:transform .18s,border-color .18s,box-shadow .18s}
+    .card{cursor:pointer;min-height:150px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;display:flex;flex-direction:column;transition:transform .18s,border-color .18s,box-shadow .18s}
     .card:hover{transform:translateY(-3px);border-color:#b8d3f1;box-shadow:0 10px 24px #204b7610}
+    .card:focus-visible{outline:3px solid #6aa7ed;outline-offset:3px}
     .card-top{display:flex;align-items:center;justify-content:space-between}
     .app-icon{width:42px;height:42px;border-radius:12px;background:#edf5ff;display:grid;place-items:center;font-size:22px}
-    .launch{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#7e91a8;background:#f5f8fc}
     .card h3{font-size:14px;margin:13px 0 5px;letter-spacing:-.25px}
     .card p{font-size:12px;color:var(--muted);margin:0;line-height:1.55}\n    .app-release{font-size:10px;color:#7b8da5;margin-top:8px}\n    .app-changes{font-size:11px;color:#536b86;margin-top:4px;line-height:1.45}\n    :root[data-theme="dark"] .app-release{color:#9eacc0}\n    :root[data-theme="dark"] .app-changes{color:#b2c2d6}
     .card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:13px}
@@ -71,7 +71,6 @@
     :root[data-theme="dark"] .card{background:#1b2638;border-color:#34445b}
     :root[data-theme="dark"] .card:hover{border-color:#5278a6;box-shadow:0 10px 24px #0005}
     :root[data-theme="dark"] .app-icon{background:#263c58}
-    :root[data-theme="dark"] .launch{background:#29374b;color:#b5c3d5}
     :root[data-theme="dark"] .tag{background:#263c58;color:#a9cfff}
     :root[data-theme="dark"] .empty{background:#1b2638;border-color:#40516a;color:var(--muted)}
     :root[data-theme="dark"] footer{color:#77879d}
@@ -93,11 +92,9 @@
     .grid.list-view .card h3{margin:0;font-size:13px}
     .grid.list-view .card p{grid-column:2;grid-row:2;align-self:start;margin-top:3px}
     .grid.list-view .card-bottom{grid-column:3;grid-row:1 / span 2;margin:0;padding:0;gap:12px}
-    .grid.list-view .launch{display:none}
     :root[data-theme="dark"] .header-action{background:#202d40;border-color:#3a4b63;color:#e7edf7}
     .card-actions{display:flex;align-items:center;gap:10px}
     .history-link{border:0;background:transparent;color:var(--blue);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:5px 0}
-    .app-open{font-size:11px;color:var(--blue);font-weight:700}
     .history-dialog{width:min(520px,calc(100% - 28px));max-height:min(78vh,680px);border:1px solid var(--line);border-radius:18px;padding:0;background:var(--white);color:var(--ink);box-shadow:0 24px 70px #102a4b33}
     .history-dialog::backdrop{background:#10243b88;backdrop-filter:blur(3px)}
     .history-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
@@ -232,15 +229,29 @@
         return categoryMatch && (!query || haystack.includes(query));
       });
       $("#apps").innerHTML = filtered.map(app => `
-        <article class="card">
-          <div class="card-top"><span class="app-icon">${escapeHtml(app.icon)}</span><a class="launch" href="${escapeHtml(app.url)}" aria-label="${escapeHtml(app.title)} 열기">↗</a></div>
+        <article class="card" data-url="${escapeHtml(app.url)}" tabindex="0" role="link" aria-label="${escapeHtml(app.title)} 웹앱 열기">
+          <div class="card-top"><span class="app-icon">${escapeHtml(app.icon)}</span></div>
           <div class="card-title-row"><h3>${escapeHtml(app.title)}</h3>${getReleaseBadge(app)}</div>
           <p>${escapeHtml(app.description)}</p>
-          <div class="card-bottom"><span class="tag">${escapeHtml(app.category)} · v${escapeHtml(app.version || "1.0")}</span><div class="card-actions"><button class="history-link" type="button" data-history="${escapeHtml(app.file)}">업데이트 내역</button><a class="app-open" href="${escapeHtml(app.url)}">열기 →</a></div></div>
+          <div class="card-bottom"><span class="tag">${escapeHtml(app.category)} · v${escapeHtml(app.version || "1.0")}</span><div class="card-actions"><button class="history-link" type="button" data-history="${escapeHtml(app.file)}">업데이트 내역</button></div></div>
         </article>`).join("");
       $("#count").textContent = `${filtered.length} / ${state.apps.length}개`;
       $("#empty").style.display = filtered.length ? "none" : "block";
     }
+    // The whole card opens its app; embedded controls (especially history) keep their own action.
+    $("#apps").addEventListener("click", event => {
+      if (event.target.closest("button, a, input, select, textarea")) return;
+      const card = event.target.closest(".card[data-url]");
+      if (card) window.location.href = card.dataset.url;
+    });
+    $("#apps").addEventListener("keydown", event => {
+      if (event.target.closest("button, a, input, select, textarea")) return;
+      const card = event.target.closest(".card[data-url]");
+      if (card && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        window.location.href = card.dataset.url;
+      }
+    });
     const historyDialog = $("#historyDialog");
     $("#historyClose").addEventListener("click", () => historyDialog.close());
     historyDialog.addEventListener("click", event => { if (event.target === historyDialog) historyDialog.close(); });

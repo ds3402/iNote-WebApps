@@ -78,3 +78,9 @@ npm run build
 - 포털 카드의 `업데이트 내역`을 누르면 버전, 날짜, 변경 내용을 확인할 수 있습니다.
 - 각 개별 앱 하단에도 포털과 동일한 통합 버전 번호를 표시합니다.
 - 버전 변경 시 HTML의 `inote:version`과 `app-history.json`의 최신 이력을 함께 갱신합니다.
+
+
+## v1.3.3
+- Removed the separate “열기” action from app cards.
+- Made the full app card clickable and keyboard accessible.
+- Kept the “업데이트 내역” control independent so it opens history without launching the app.
