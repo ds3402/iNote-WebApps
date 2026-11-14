@@ -13,7 +13,7 @@
     html,body{height:100%}
     body{margin:0;font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;color:var(--fg);background:var(--bg)}
     header{position:sticky;top:0;backdrop-filter:saturate(180%) blur(8px);background:linear-gradient(180deg,#ffffffee,#ffffffcc);border-bottom:1px solid var(--border);z-index:10}
-    header .inner{display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:680px;margin:0 auto;padding:10px 16px}
+    header .inner{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:8px;max-width:680px;margin:0 auto;padding:10px 16px}
     h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
     .maker{margin-left:8px;color:var(--muted);font-size:10px;white-space:nowrap}
 
@@ -69,7 +69,7 @@
     <meta name="inote:publish" content="true">
     <meta name="inote:version" content="1.1">
     <meta name="inote:updated" content="2026-11-14">
-    <meta name="inote:changes" content="PNG 저장 기능 제거, 정삼각형 구성도로 도형 비율 수정, 꼭짓점 및 각도 호·변 표시 위치 정렬 개선">
+    <meta name="inote:changes" content="PNG 저장 기능 제거, 정삼각형 구성도 및 각도·변 표시 정렬 개선, 각도 숫자 표시 제거, 꼭짓점 C 라벨 간격 조정, 구성도 하단 안내 문구 제거, 상단 단위 토글을 별도 행으로 배치">
     <meta name="inote:badge" content="update">
     <meta name="inote:badge-until" content="2026-11-28">
 </head>
@@ -80,7 +80,7 @@
         <h1>Triangle Solver</h1>
         <span class="maker">주식회사 유현</span>
       </div>
-      <div class="group" style="display:flex;gap:8px;align-items:center">
+      <div class="group header-controls" style="display:flex;gap:8px;align-items:center;justify-content:flex-start">
         <div class="chip" id="angleSeg" title="Angle unit">
           <button type="button" data-angle="deg" class="mini active">deg</button>｜
           <button type="button" data-angle="rad" class="mini">rad</button>
@@ -235,22 +235,22 @@
       </defs>
 
       <!-- Equilateral triangle: all three sides are exactly 320 SVG units -->
-      <path d="M100 300 L420 300 L260 22.871 L100 300 Z"
+      <path d="M100 310 L420 310 L260 32.871 L100 310 Z"
             fill="url(#triFill)" stroke="url(#triLine)" stroke-width="5"
             stroke-linejoin="round" filter="url(#triShadow)"/>
 
       <!-- Equal-side tick marks, centered and perpendicular to each side -->
       <g stroke="#2563eb" stroke-width="3.5" stroke-linecap="round">
-        <path d="M260 291 L260 309"/>
-        <path d="M176 153 L191 162"/>
-        <path d="M329 162 L344 153"/>
+        <path d="M260 301 L260 319"/>
+        <path d="M176 158 L191 167"/>
+        <path d="M329 167 L344 158"/>
       </g>
 
       <!-- Interior angle arcs, all drawn inside the triangle -->
       <g fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round">
-        <path d="M142 300 A42 42 0 0 0 121 263.627"/>
-        <path d="M399 263.627 A42 42 0 0 0 378 300"/>
-        <path d="M281 59.244 A42 42 0 0 1 239 59.244"/>
+        <path d="M142 310 A42 42 0 0 0 121 273.627"/>
+        <path d="M399 273.627 A42 42 0 0 0 378 310"/>
+        <path d="M281 69.244 A42 42 0 0 1 239 69.244"/>
       </g>
 
       <!-- Angle labels positioned just inside each angle arc -->
@@ -274,7 +274,7 @@
                 fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
           <text y="6" fill="#1d4ed8">b</text>
         </g>
-        <g transform="translate(260 326)">
+        <g transform="translate(260 336)">
           <rect x="-21" y="-17" width="42" height="34" rx="12"
                 fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
           <text y="6" fill="#1d4ed8">c</text>
@@ -283,20 +283,15 @@
 
       <!-- Vertex dots and labels -->
       <g>
-        <circle cx="100" cy="300" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
-        <circle cx="420" cy="300" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
-        <circle cx="260" cy="22.871" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="100" cy="310" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="420" cy="310" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="260" cy="32.871" r="7" fill="#fff" stroke="#2563eb" stroke-width="3.5"/>
         <g font-family="Malgun Gothic, sans-serif" font-size="18" font-weight="800" fill="#0f172a">
-          <text x="76" y="322">A</text>
-          <text x="430" y="322">B</text>
-          <text x="260" y="14" text-anchor="middle">C</text>
+          <text x="76" y="332">A</text>
+          <text x="430" y="332">B</text>
+          <text x="260" y="20" text-anchor="middle">C</text>
         </g>
       </g>
-
-      <text x="260" y="353" text-anchor="middle"
-            font-family="Malgun Gothic, sans-serif" font-size="12" fill="#64748b">
-        설명용 정삼각형 · 실제 계산 결과는 입력값 기준
-      </text>
     `;
   }
 
