@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-14T14:30:58.582Z",
-  "count": 7,
+  "generatedAt": "2026-11-15T13:08:24.109Z",
+  "count": 8,
   "apps": [
     {
       "id": "torque-converter-html",
@@ -167,6 +167,34 @@
       "badgeUntil": "2026-11-28",
       "url": "App/pack_cover_calculator.html",
       "file": "pack_cover_calculator.html"
+    },
+    {
+      "id": "shaft-alignment-html",
+      "title": "Pump & Motor Shaft Alignment",
+      "description": "Rim 외경(Rim)과 커플링 면 사이 Gap 측정을 이용한 펌프·모터 축 정렬 및 모터 4개 Foot 보정 계산",
+      "category": "Engineering",
+      "icon": "⚙️",
+      "keywords": "축정렬, Pump, Motor, Rim, Gap, Offset, Angular, Shim, Foot",
+      "version": "1.0",
+      "updated": "2026-11-15",
+      "changes": "Rim+Gap 측정 방식, 1/100mm 입력, SAG 보정 제외, A·B·C·D 설비 치수, 모터 4개 Foot 보정 표시, 부호별 허용기준 및 축 방향 Distance 판정",
+      "history": [
+        {
+          "version": "1.0",
+          "date": "2026-11-15",
+          "changes": [
+            "최초 통합 등록 및 현장 측정 방식 정리",
+            "Rim 외경 + Gap 측정, 1/100mm 입력 및 SAG 보정 제외",
+            "설비 치수 A·B·C·D 및 모터 4개 Foot 보정 결과",
+            "Offset·Angular 부호별 허용기준과 축 방향 Distance 기준 설정",
+            "작업 기록, JSON 백업 및 CSV 내보내기"
+          ]
+        }
+      ],
+      "badge": "new",
+      "badgeUntil": "2026-11-29",
+      "url": "App/shaft_alignment.html",
+      "file": "shaft_alignment.html"
     },
     {
       "id": "unit-converter-html",

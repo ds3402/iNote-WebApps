@@ -83,5 +83,18 @@
         "최초 통합 등록"
       ]
     }
+  ],
+  "shaft_alignment.html": [
+    {
+      "version": "1.0",
+      "date": "2026-11-15",
+      "changes": [
+        "최초 통합 등록 및 현장 측정 방식 정리",
+        "Rim 외경 + Gap 측정, 1/100mm 입력 및 SAG 보정 제외",
+        "설비 치수 A·B·C·D 및 모터 4개 Foot 보정 결과",
+        "Offset·Angular 부호별 허용기준과 축 방향 Distance 기준 설정",
+        "작업 기록, JSON 백업 및 CSV 내보내기"
+      ]
+    }
   ]
 }

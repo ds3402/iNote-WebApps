@@ -90,3 +90,9 @@ npm run build
 - 토크렌치 연장바 계산기 화면을 브라우저 가로 중앙에 배치하도록 레이아웃 보정
 - 각 앱 내부 제목과 문서 제목에 남아 있던 과거 v2/v3 표기를 제거
 - 각 앱의 버전 표시는 통합 메타데이터 및 하단 iNote Web Apps 버전 표시를 기준으로 통일
+
+## Pump & Motor Shaft Alignment
+- `App/shaft_alignment.html` provides Rim & Face, Reverse-Rim, laser-result/manual offset-angular input, Soft Foot checks, configurable tolerance references, and local work records.
+- Work records are stored in the current browser's localStorage. Use JSON backup/restore to transfer records between devices; no server synchronization is provided.
+- Laser mode accepts manually transcribed values from a laser alignment instrument; it does not connect to instrument hardware or parse vendor files.
+- Alignment sign conventions and measurement setup must be confirmed against the actual indicator/laser instrument arrangement before field use. OEM and site tolerances take precedence.

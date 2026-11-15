@@ -1,4 +1,4 @@
-const CACHE_NAME = "inote-webapps-v1.3.13";
+const CACHE_NAME = "inote-webapps-v1.3.15";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -13,7 +13,8 @@ const PRECACHE_URLS = [
   "./App/bolt_length_calculator.html",
   "./App/unit_converter.html",
   "./App/torque_converter.html",
-  "./App/torque_extension_calculator.html"
+  "./App/torque_extension_calculator.html",
+  "./App/shaft_alignment.html"
 ];
 
 self.addEventListener("install", event => {
