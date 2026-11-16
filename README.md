@@ -64,7 +64,7 @@ npm run build
 새 앱을 추가하거나 파일명을 변경하면 `service-worker.js`의 `PRECACHE_URLS`도 함께 갱신합니다.
 캐시 버전 `CACHE_NAME`을 올리면 기존 iNote 캐시는 새 서비스 워커 활성화 시 정리됩니다.
 
-현재 포털 배포 버전: `1.3.1`
+현재 포털 배포 버전: `1.3.17`
 개별 앱 버전은 각 앱 카드에 별도로 표시됩니다.
 
 
@@ -96,3 +96,9 @@ npm run build
 - Work records are stored in the current browser's localStorage. Use JSON backup/restore to transfer records between devices; no server synchronization is provided.
 - Laser mode accepts manually transcribed values from a laser alignment instrument; it does not connect to instrument hardware or parse vendor files.
 - Alignment sign conventions and measurement setup must be confirmed against the actual indicator/laser instrument arrangement before field use. OEM and site tolerances take precedence.
+
+
+## v1.3.17 변경 사항
+- 유용한 링크의 KTV Box 설명을 실시간 TV 시청 사이트로 수정
+- 웨더아이 설명을 삼성중공업 제공 날씨정보로 수정
+- 서비스 워커 캐시 버전 갱신
