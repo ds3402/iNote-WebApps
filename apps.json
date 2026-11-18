@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-16T12:43:24.524Z",
-  "count": 8,
+  "generatedAt": "2026-11-18T14:47:45.025Z",
+  "count": 9,
   "apps": [
     {
       "id": "torque-converter-html",
@@ -167,6 +167,32 @@
       "badgeUntil": "2026-11-28",
       "url": "App/pack_cover_calculator.html",
       "file": "pack_cover_calculator.html"
+    },
+    {
+      "id": "chock-liner-calculator-html",
+      "title": "Chock Liner 가공값 계산기",
+      "description": "Chock Liner 계측값 자동 계산, 가공 마진 적용 및 A4 가공값 출력",
+      "category": "Engineering",
+      "icon": "📐",
+      "keywords": "Chock Liner, 초크라이너, 계측, 평면, 가공값, 마진, 설비, 유현",
+      "version": "1.1",
+      "updated": "2026-11-18",
+      "changes": "iNote Web Apps 포털 최초 등록, 주식회사 유현 표기 추가",
+      "history": [
+        {
+          "version": "1.1",
+          "date": "2026-11-18",
+          "changes": [
+            "iNote Web Apps 포털 최초 등록",
+            "주식회사 유현 표기 추가",
+            "계측값 자동 계산 및 A4 PDF 출력 기능 제공"
+          ]
+        }
+      ],
+      "badge": "new",
+      "badgeUntil": "2026-12-02",
+      "url": "App/chock_liner_calculator.html",
+      "file": "chock_liner_calculator.html"
     },
     {
       "id": "shaft-alignment-html",

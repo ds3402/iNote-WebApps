@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chock Liner 가공값 계산기 v1.1</title>
+<style>
+:root{--blue:#1456a0;--blue2:#eaf3ff;--line:#cbd8e8;--ink:#19324f;--muted:#687b91}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:var(--ink);font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif}
+header{background:linear-gradient(110deg,#103d78,#1764b5);color:white;padding:17px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0 0 4px}header p{margin:0;color:#d9eaff;font-size:13px}.actions{display:flex;gap:7px;flex-wrap:wrap}
+button,.filebtn{border:1px solid #b8cbe2;background:white;color:#16477f;border-radius:7px;padding:9px 12px;font-weight:bold;cursor:pointer;font-size:13px}
+button.primary{background:#1557a2;color:white;border-color:#1557a2}button.danger{color:#a22}
+main{max-width:1700px;margin:15px auto;padding:0 14px}.topgrid{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:12px}
+.panel{background:white;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:13px;box-shadow:0 2px 7px #18385c0a}
+.pt{background:var(--blue2);padding:10px 13px;font-weight:bold;color:#17477f;border-bottom:1px solid var(--line)}.pb{padding:12px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:bold;margin-bottom:4px}
+input,select{width:100%;min-width:0;border:1px solid #bdcde0;border-radius:6px;padding:7px 8px;font:inherit;color:var(--ink)}
+.diagram{display:flex;align-items:center;justify-content:center;gap:16px;min-height:120px}.sq{width:130px;height:82px;border:2px solid #2670c3;background:#eff6ff;display:grid;place-items:center;position:relative;font-weight:bold;color:#24548a}
+.corner{position:absolute;font-size:14px}.tl{top:-22px;left:-5px}.tr{top:-22px;right:-5px}.bl{bottom:-22px;left:-5px}.br{bottom:-22px;right:-5px}
+.formula{font-size:11px;line-height:1.7}.formula b{color:var(--blue)}
+.margins{display:grid;grid-template-columns:1fr 1fr;gap:7px}.opt{border:1px solid var(--line);border-radius:7px;padding:7px}.opt.active{border-color:#2b75c5;background:#f1f7ff}.opt label{color:#214e80}.opt input[type=radio]{width:auto}
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.toolbar{background:var(--blue);color:white;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.toolbar button{padding:6px 9px;font-size:12px}
+.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:600px;table-layout:fixed}
+th,td{border:1px solid #d1deec;padding:4px 5px;text-align:center}th{background:#eaf2fc;color:#17477f;font-size:11px;white-space:nowrap}
+td input{text-align:center;padding:6px 3px;font-size:12px}td input.auto{background:#e1f7e7;font-weight:bold;border-color:#a5ddb4}
+.result-table td{font-size:12px}.value{display:block;font-size:13px;font-weight:bold;color:#174c88}.delta{display:block;font-size:10px;color:#65758b;margin-top:2px}
+.maxcell{background:#edf5ff;font-weight:bold;color:#123f77}.status{font-size:11px;color:var(--muted);padding:8px 11px}
+.mobile-list{display:none}.print{display:none}.app-footer{text-align:center;color:#71839a;font-size:11px;padding:2px 12px 16px;letter-spacing:.2px}
+@media(max-width:1000px){.topgrid{grid-template-columns:1fr 1fr}.topgrid .panel:last-child{grid-column:1/-1}.workspace{grid-template-columns:1fr}}
+@media(max-width:650px){
+ header{padding:13px}h1{font-size:18px}main{padding:0 8px}.topgrid{grid-template-columns:1fr}.topgrid .panel:last-child{grid-column:auto}
+ .workspace{grid-template-columns:1fr}.pc-tables{display:none}.mobile-list{display:block}
+ .mobile-row{background:white;border:1px solid var(--line);border-radius:9px;padding:11px;margin:8px 0}
+ .mobile-head{display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:#1557a2;margin-bottom:8px}
+ .mobile-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+ .mobile-result{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:9px}
+ .mout{background:#eff6ff;border-radius:6px;text-align:center;padding:7px}.mout b{display:block;font-size:15px}.mout small{font-size:10px;color:#60738b}
+ .diagram{gap:12px}.sq{width:120px;height:78px}.actions button,.filebtn{padding:8px;font-size:12px}
+}
+@media print{@page{size:A4 portrait;margin:8mm}body{background:white}header,main,.noprint{display:none!important}.print{display:block!important}}
+.printpage{width:194mm;margin:auto;color:#111;font-family:"Malgun Gothic","맑은 고딕",sans-serif}
+.phead{display:grid;grid-template-columns:1fr 55mm;gap:4mm;border-bottom:1px solid #8195ad;padding-bottom:3mm}
+.ptitle{text-align:center;font-size:17pt;font-weight:bold;margin:0 0 2mm}.psub{text-align:center;color:#1557a2;font-weight:bold;margin-bottom:3mm}
+.meta{display:flex;justify-content:space-between;font-size:8pt}.pmargin{border:1px solid #536b88;text-align:center}
+.pmargin b{display:block;background:#eaf2fc;padding:2mm}.mgrid{display:grid;grid-template-columns:repeat(4,1fr)}
+.mgrid span{border-top:1px solid #8297b2;border-right:1px solid #8297b2;padding:1.5mm;font-size:8pt}.mgrid span:last-child{border-right:0}
+.ptable{width:100%;border-collapse:collapse;margin-top:4mm;table-layout:fixed}
+.ptable th,.ptable td{border:1px solid #405a79;text-align:center;padding:1mm .5mm}.ptable th{background:#dceafa;font-size:8pt}
+.ptable td{height:10mm;font-size:8pt}.ptable td:first-child{font-size:12pt;font-weight:bold;color:#173f70}.ptable tbody tr:nth-child(odd){background:#ffffff}.ptable tbody tr:nth-child(even){background:#fff39b}
+.pval{display:inline-block;min-width:12mm;padding:0.4mm 1.2mm;font-size:12pt;font-weight:bold}
+.pval.ismax{border:1.2px solid #df2525;border-radius:50%;padding:0.3mm 2mm}
+.pdelta{display:block;font-size:7pt;margin-top:1mm;padding-top:1mm;border-top:1px solid #8195ad}.pmax{background:#e5f1ff;font-weight:bold}
+.pnote{background:#eaf2fc;margin-top:3mm;padding:2mm;font-size:7.5pt}.pcompany{text-align:right;margin-top:3mm;color:#52657b;font-size:8pt;font-weight:bold}
+.signrow{display:flex;justify-content:flex-end;gap:25mm;margin-top:5mm;font-size:8pt}
+
+.page-tab{padding:6px 12px;border:1px solid #b8cbe2;border-radius:7px;background:#fff;color:#17477f;font-weight:bold;cursor:pointer}
+.page-tab.active{background:#1456a0;color:#fff;border-color:#1456a0}
+.value{padding-bottom:3px;border-bottom:1px solid #9eafc2;min-width:34px}
+@media print{@page{size:A4 portrait;margin:8mm}.printpage{break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}.printpage:last-child{break-after:auto;page-break-after:auto}}
+</style>
+<meta name="inote:title" content="Chock Liner 가공값 계산기">
+<meta name="inote:description" content="Chock Liner 계측값 자동 계산, 가공 마진 적용 및 A4 가공값 출력">
+<meta name="inote:category" content="Engineering">
+<meta name="inote:icon" content="📐">
+<meta name="inote:keywords" content="Chock Liner, 초크라이너, 계측, 평면, 가공값, 마진, 설비, 유현">
+<meta name="inote:version" content="1.1">
+<meta name="inote:updated" content="2026-11-18">
+<meta name="inote:changes" content="iNote Web Apps 포털 최초 등록, 주식회사 유현 표기 추가">
+<meta name="inote:badge" content="new">
+<meta name="inote:badge-until" content="2026-12-02">
+</head>
+<body>
+<header><div><h1>Chock Liner 가공값 계산기 <small style="font-size:12px;opacity:.8">v1.1</small></h1><p>계측값 입력 → 평면 가공값 자동 계산 → A4 세로 출력</p></div>
+<div class="actions noprint"><button onclick="saveJSON()">JSON 저장</button><label class="filebtn">불러오기<input type="file" accept=".json" hidden onchange="loadJSON(event)"></label><button class="primary" onclick="printPDF()">A4 PDF / 인쇄</button><button class="danger" onclick="resetAll()">초기화</button></div></header>
+<main>
+<div class="topgrid noprint">
+<section class="panel"><div class="pt">장비 정보</div><div class="pb fields"><div><label>장비명</label><input id="equipment" placeholder="예) SN.2679 발전기 LINER"></div><div><label>작업일</label><input id="date" type="date"></div><div><label>작성자</label><input id="author" placeholder="작성자"></div><div><label>연락처</label><input id="contact" placeholder="연락처"></div></div></section>
+<section class="panel"><div class="pt">모서리 위치 및 평면 계산 기준</div><div class="pb diagram"><div class="sq">Chock Liner<span class="corner tl">D</span><span class="corner tr">C</span><span class="corner bl">A</span><span class="corner br">B</span></div><div class="formula"><b>A + C = B + D</b><br>입력된 세 모서리로 나머지 한 모서리 자동 계산<br>ABC → D = A + C − B<br>ABD → C = B + D − A<br>ACD → B = A + C − D<br>BCD → A = B + D − C</div></div></section>
+<section class="panel"><div class="pt">가공 마진 (한 가지 방식 선택)</div><div class="pb margins">
+<div class="opt active" data-mode="AB"><label><input type="radio" name="mode" value="AB" checked> AB 일괄</label><input id="mAB" type="number" step="0.01" value="0.00"></div>
+<div class="opt" data-mode="CD"><label><input type="radio" name="mode" value="CD"> CD 일괄</label><input id="mCD" type="number" step="0.01" value="0.00"></div>
+<div class="opt" data-mode="ABCD"><label><input type="radio" name="mode" value="ABCD"> ABCD 전체</label><input id="mABCD" type="number" step="0.01" value="0.00"></div>
+<div><label>방향</label><select id="sign"><option value="+">더하기 (+)</option><option value="-">빼기 (−)</option></select><div class="status">선택한 방식 하나만 적용</div></div>
+</div></section></div>
+<div class="panel noprint" style="margin-bottom:12px"><div class="toolbar"><b>작업 페이지</b><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span id="pageLabel">1페이지</span><button onclick="addPage()">＋ 페이지 추가</button><button onclick="deletePage()" class="danger">현재 페이지 삭제</button></div></div><div id="pageTabs" style="display:flex;gap:6px;flex-wrap:wrap;padding:9px"></div></div>
+<div class="workspace">
+<section class="panel pc-tables noprint"><div class="toolbar"><b>① 계측 입력값</b><span id="count">20 / 20</span><div><button onclick="addRow()">＋ 행 추가</button><button onclick="clearValues()">값 지우기</button></div></div>
+<div class="tablewrap"><table><thead><tr><th style="width:12%">No.</th><th>A (mm)</th><th>B (mm)</th><th>C (mm)</th><th>D (mm)</th></tr></thead><tbody id="inputBody"></tbody></table></div>
+<div class="status">No.는 현장 라이너 마킹 방식에 맞게 자유롭게 입력할 수 있습니다. A/B/C/D 중 세 값만 입력하면 나머지 한 값이 자동 계산됩니다.</div></section>
+<section class="panel pc-tables noprint"><div class="toolbar"><b>② 최종 가공값</b><span>마진 적용 결과</span></div>
+<div class="tablewrap"><table class="result-table"><thead><tr><th style="width:12%">No.</th><th>A</th><th>B</th><th>C</th><th>D</th><th style="width:15%">ABCD<br>최대값</th></tr></thead><tbody id="outputBody"></tbody></table></div>
+<div class="status">각 가공값 아래 Δ는 해당 행의 ABCD 최대값 대비 차이입니다.</div></section>
+</div>
+<section class="panel mobile-list noprint"><div class="toolbar"><b>라이너 계측 / 가공값</b><span id="mcount"></span><button onclick="addRow()">＋ 행 추가</button></div><div id="mobileRows"></div></section>
+</main>
+<footer class="app-footer noprint">주식회사 유현</footer>
+<section class="print" id="print"></section>
+<script>
+const K=['A','B','C','D'];
+let pages=[makePage(1)],currentPageIndex=0;
+function makePage(pageNo){return {pageNo,rows:Array.from({length:20},(_,i)=>({no:`${pageNo}-${i+1}`,v:{A:'',B:'',C:'',D:''},check:'',note:''}))}}
+const $=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),n=x=>x===''||x==null||!Number.isFinite(Number(x))?null:Number(x),f=x=>x==null?'':Number(x).toFixed(2);
+function rows(){return pages[currentPageIndex].rows}
+function calculate(r){
+ let vals={...r.v},known=K.filter(k=>n(vals[k])!==null),missing=K.filter(k=>n(vals[k])===null);
+ if(known.length===3){let v={};known.forEach(k=>v[k]=n(vals[k]));if(missing[0]==='D')vals.D=f(v.A+v.C-v.B);else if(missing[0]==='C')vals.C=f(v.B+v.D-v.A);else if(missing[0]==='B')vals.B=f(v.A+v.C-v.D);else if(missing[0]==='A')vals.A=f(v.B+v.D-v.C)}
+ let base={};K.forEach(k=>base[k]=n(vals[k]));let mode=document.querySelector('[name=mode]:checked').value,sign=$('sign').value,amount=n($('m'+mode).value)||0,final={...base};
+ let targets=mode==='AB'?['A','B']:mode==='CD'?['C','D']:K;targets.forEach(k=>{if(final[k]!==null)final[k]+=sign==='+'?amount:-amount});
+ let max=K.every(k=>final[k]!==null)?Math.max(...K.map(k=>final[k])):null,delta={};K.forEach(k=>delta[k]=max===null||final[k]===null?null:max-final[k]);
+ return {vals,base,final,max,delta,knownCount:known.length,missing:missing[0]||null};
+}
+function payload(){return{equipment:$('equipment').value,date:$('date').value,author:$('author').value,contact:$('contact').value,mode:document.querySelector('[name=mode]:checked').value,sign:$('sign').value,margins:{AB:$('mAB').value,CD:$('mCD').value,ABCD:$('mABCD').value},pages,currentPageIndex}}
+function render(){
+ const rs=rows();$('count').textContent=`${rs.length} / 20`;$('mcount').textContent=`${rs.length}개`;$('pageLabel').textContent=`${currentPageIndex+1}페이지`;
+ $('pageTabs').innerHTML=pages.map((p,i)=>`<button class="page-tab ${i===currentPageIndex?'active':''}" onclick="selectPage(${i})">${i+1}페이지</button>`).join('');
+ $('inputBody').innerHTML=rs.map((r,i)=>{let c=calculate(r);return `<tr><td><input aria-label="No ${i+1}" value="${esc(r.no)}" oninput="setNo(${i},this.value)"></td>${K.map(k=>`<td><input data-row="${i}" data-corner="${k}" type="number" step="0.01" value="${esc(c.vals[k]??'')}" ${c.knownCount===3&&c.missing===k?'readonly class="auto"':''} oninput="setValue(${i},'${k}',this.value)" onkeydown="inputTabOrder(event,${i},'${k}')"></td>`).join('')}</tr>`}).join('');
+ renderOutputs();updatePrint();document.querySelectorAll('.opt').forEach(x=>x.classList.toggle('active',x.dataset.mode===document.querySelector('[name=mode]:checked').value));
+}
+function renderOutputs(){
+ const rs=rows();
+ $('outputBody').innerHTML=rs.map(r=>{let c=calculate(r);return `<tr><td>${esc(r.no)}</td>${K.map(k=>`<td><span class="value">${f(c.final[k])||'—'}</span><span class="delta">Δ ${f(c.delta[k])||'—'}</span></td>`).join('')}<td class="maxcell">${f(c.max)||'—'}</td></tr>`}).join('');
+ $('mobileRows').innerHTML=rs.map((r,i)=>{let c=calculate(r);return `<article class="mobile-row"><div class="mobile-head"><span>No. ${esc(r.no)||'미지정'}</span><span>${c.max===null?'계측 입력 중':'최대 '+f(c.max)}</span></div><label>No. / 마킹 번호</label><input value="${esc(r.no)}" oninput="setNo(${i},this.value)"><div class="mobile-fields" style="margin-top:8px">${K.map(k=>`<div><label>${k} 계측값 (mm)</label><input data-mobile-row="${i}" data-corner="${k}" type="number" step="0.01" value="${esc(r.v[k])}" ${c.knownCount===3&&c.missing===k?'readonly class="auto"':''} oninput="setValue(${i},'${k}',this.value)" onkeydown="inputTabOrder(event,${i},'${k}',true)"></div>`).join('')}</div><div class="mobile-result">${K.map(k=>`<div class="mout"><small>${k} 최종 / Δ</small><b>${f(c.final[k])||'—'}</b><small>Δ ${f(c.delta[k])||'—'}</small></div>`).join('')}</div></article>`}).join('');
+}
+function inputTabOrder(e,i,k,mobile=false){if(e.key!=='Tab'||e.shiftKey)return;let ix=K.indexOf(k);if(ix<3){e.preventDefault();let sel=mobile?`[data-mobile-row="${i}"][data-corner="${K[ix+1]}"]`:`[data-row="${i}"][data-corner="${K[ix+1]}"]`;document.querySelector(sel)?.focus()}}
+function setNo(i,v){rows()[i].no=v;renderOutputs();updatePrint()}
+function setValue(i,k,v){rows()[i].v[k]=v;let c=calculate(rows()[i]);K.forEach(corner=>{let input=document.querySelector(`[data-row="${i}"][data-corner="${corner}"]`);if(input){if(input!==document.activeElement)input.value=c.vals[corner]??'';input.readOnly=c.knownCount===3&&corner===c.missing;input.classList.toggle('auto',input.readOnly)}let minput=document.querySelector(`[data-mobile-row="${i}"][data-corner="${corner}"]`);if(minput){if(minput!==document.activeElement)minput.value=c.vals[corner]??'';minput.readOnly=c.knownCount===3&&corner===c.missing;minput.classList.toggle('auto',minput.readOnly)}});renderOutputs();updatePrint()}
+function selectPage(i){currentPageIndex=i;render()}
+function addPage(){if(pages.length>=99){alert('최대 99페이지까지 추가할 수 있습니다.');return}pages.push(makePage(pages.length+1));currentPageIndex=pages.length-1;render()}
+function deletePage(){if(pages.length===1){alert('최소 한 페이지는 유지해야 합니다.');return}if(!confirm(`${currentPageIndex+1}페이지를 삭제할까요?`))return;pages.splice(currentPageIndex,1);pages.forEach((p,i)=>{p.pageNo=i+1});currentPageIndex=Math.max(0,currentPageIndex-1);render()}
+function clearValues(){if(confirm('현재 페이지의 모든 계측값을 지울까요?')){rows().forEach(r=>r.v={A:'',B:'',C:'',D:''});render()}}
+function resetAll(){if(!confirm('전체 내용을 초기화할까요?'))return;pages=[makePage(1)];currentPageIndex=0;['equipment','author','contact'].forEach(x=>$(x).value='');$('date').value=new Date().toISOString().slice(0,10);render()}
+function makeFileBase(){
+ const d=payload();
+ const date=(d.date||new Date().toISOString().slice(0,10)).replace(/-/g,'').slice(2);
+ const equipment=(d.equipment||'장비명없음').trim().replace(/[\\\\/:*?"<>|]/g,'_').replace(/[. ]+$/g,'');
+ return `${date}_${equipment||'장비명없음'}`;
+}
+function saveJSON(){
+ const b=new Blob([JSON.stringify(payload(),null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=makeFileBase()+'.json';a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function printPDF(){
+ const oldTitle=document.title;
+ document.title=makeFileBase();
+ window.addEventListener('afterprint',()=>{document.title=oldTitle},{once:true});
+ window.print();
+}
+
+function loadJSON(e){let file=e.target.files[0];if(!file)return;let rd=new FileReader();rd.onload=()=>{try{let d=JSON.parse(rd.result);$('equipment').value=d.equipment||'';$('date').value=d.date||'';$('author').value=d.author||'';$('contact').value=d.contact||d.meta||'';if(d.mode)document.querySelector(`[name=mode][value="${d.mode}"]`).checked=true;$('sign').value=d.sign||'+';['AB','CD','ABCD'].forEach(k=>$('m'+k).value=d.margins?.[k]??'0');if(Array.isArray(d.pages)){pages=d.pages.slice(0,99).map((p,i)=>({pageNo:i+1,rows:(p.rows||[]).slice(0,20).map((r,j)=>({no:String(r.no??`${i+1}-${j+1}`),v:{A:r.v?.A??'',B:r.v?.B??'',C:r.v?.C??'',D:r.v?.D??''},check:'',note:''}))}));}else{pages=[{pageNo:1,rows:(d.rows||[]).slice(0,20).map((r,i)=>({...r,no:String(r.no??`1-${i+1}`)}))}]}if(!pages.length)pages=[makePage(1)];pages.forEach((p,i)=>{while(p.rows.length<20)p.rows.push({no:`${i+1}-${p.rows.length+1}`,v:{A:'',B:'',C:'',D:''},check:'',note:''})});currentPageIndex=Math.min(d.currentPageIndex||0,pages.length-1);render()}catch(_){alert('JSON 파일을 읽을 수 없습니다.')}};rd.readAsText(file);e.target.value=''}
+function updatePrint(){
+ let d=payload(),mode=d.mode,targets=mode==='AB'?['A','B']:mode==='CD'?['C','D']:K;
+ $('print').innerHTML=pages.map((page,pi)=>{let active=page.rows.map(r=>({r,c:calculate(r)})).filter(x=>x.c.max!==null);let body=active.map(({r,c})=>`<tr><td>${esc(r.no)}</td>${K.map(k=>`<td><span class="pval ${Math.abs(c.final[k]-c.max)<1e-8?'ismax':''}">${f(c.final[k])}</span><span class="pdelta">Δ ${f(c.delta[k])}</span></td>`).join('')}<td></td><td></td><td class="pmax">${f(c.max)}</td></tr>`).join('');return `<div class="printpage"><div class="phead"><div><h2 class="ptitle">${esc(d.equipment||'CHOCK LINER')}</h2><div class="psub">최종 가공값 (출력용) · ${pi+1}페이지</div><div class="meta"><span>작업일 : ${esc(d.date)}</span><span>작성자 : ${esc(d.author)}</span><span>연락처 : ${esc(d.contact)}</span></div></div><div class="pmargin"><b>가공 마진</b><div class="mgrid">${K.map(k=>`<span>${k}</span>`).join('')}</div><div class="mgrid">${K.map(k=>`<span>${targets.includes(k)?(d.sign==='-'?'-':'+')+d.margins[mode]:'0.00'}</span>`).join('')}</div></div></div><table class="ptable"><colgroup><col style="width:8%"><col style="width:16%"><col style="width:16%"><col style="width:16%"><col style="width:16%"><col style="width:6%"><col style="width:6%"><col style="width:16%"></colgroup><thead><tr><th>No.</th><th>A</th><th>B</th><th>C</th><th>D</th><th>확인</th><th>기타</th><th>ABCD 최대값</th></tr></thead><tbody>${body}</tbody></table><div class="pnote">※ 각 셀 하단의 Δ값은 해당 행의 A, B, C, D 최종 가공값 중 최대값 대비 차이값입니다. (Δ = ABCD 최대값 − 해당 가공값)</div></div>`}).join('');
+}
+['equipment','date','author','contact','mAB','mCD','mABCD','sign'].forEach(id=>$(id).addEventListener('input',()=>{renderOutputs();updatePrint()}));document.querySelectorAll('[name=mode]').forEach(x=>x.addEventListener('change',render));$('date').value=new Date().toISOString().slice(0,10);render();
+</script></body></html>

@@ -41,6 +41,7 @@ Cloudflare Workers Static Assets로 배포하는 개인 웹앱 포털입니다.
 - `triangle_solver.html`
 - `pack_cover_calculator.html`
 - `unit_converter.html`
+- `chock_liner_calculator.html`
 
 ## 새 웹앱 추가
 1. HTML 파일을 `App/` 폴더에 추가합니다.
@@ -102,3 +103,9 @@ npm run build
 - 유용한 링크의 KTV Box 설명을 실시간 TV 시청 사이트로 수정
 - 웨더아이 설명을 삼성중공업 제공 날씨정보로 수정
 - 서비스 워커 캐시 버전 갱신
+
+
+## v1.3.18 변경 사항
+- Chock Liner 가공값 계산기 v1.1을 Engineering 카테고리에 추가
+- 계측값 자동 계산, 가공 마진 및 A4 PDF 출력 지원
+- 서비스 워커 캐시 버전 갱신 및 신규 앱 사전 캐시 등록

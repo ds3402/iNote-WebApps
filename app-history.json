@@ -96,5 +96,16 @@
         "작업 기록, JSON 백업 및 CSV 내보내기"
       ]
     }
+  ],
+  "chock_liner_calculator.html": [
+    {
+      "version": "1.1",
+      "date": "2026-11-18",
+      "changes": [
+        "iNote Web Apps 포털 최초 등록",
+        "주식회사 유현 표기 추가",
+        "계측값 자동 계산 및 A4 PDF 출력 기능 제공"
+      ]
+    }
   ]
 }
