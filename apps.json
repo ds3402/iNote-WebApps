@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T14:47:45.025Z",
+  "generatedAt": "2026-11-19T12:16:49.415Z",
   "count": 9,
   "apps": [
     {
@@ -99,76 +99,6 @@
       "file": "bolt_length_calculator.html"
     },
     {
-      "id": "triangle-solver-html",
-      "title": "삼각형 계산기",
-      "description": "변과 각을 이용해 삼각형의 길이, 각도, 둘레와 넓이를 계산합니다.",
-      "category": "Engineering",
-      "icon": "📐",
-      "keywords": "삼각형, 삼각함수, 변, 각도, 넓이",
-      "version": "1.1",
-      "updated": "2026-11-14",
-      "changes": "PNG 저장 기능 제거, 정삼각형 구성도 및 각도·변 표시 정렬 개선, 각도 숫자 표시 제거, 꼭짓점 C 라벨 간격 조정, 구성도 하단 안내 문구 제거, 상단 단위 토글을 별도 행으로 배치",
-      "history": [
-        {
-          "version": "1.1",
-          "date": "2026-11-14",
-          "changes": [
-            "PNG 저장 기능 제거",
-            "정삼각형 구성도 및 각도·변 표시 정렬 개선",
-            "각도 숫자 표시 제거",
-            "꼭짓점 C 라벨 간격 조정",
-            "구성도 하단 안내 문구 제거",
-            "상단 단위 토글을 별도 행으로 배치"
-          ]
-        },
-        {
-          "version": "1.0",
-          "date": "최초 등록",
-          "changes": [
-            "최초 통합 등록"
-          ]
-        }
-      ],
-      "badge": "update",
-      "badgeUntil": "2026-11-28",
-      "url": "App/triangle_solver.html",
-      "file": "triangle_solver.html"
-    },
-    {
-      "id": "pack-cover-calculator-html",
-      "title": "포장재 커버 사이즈 계산기",
-      "description": "포장 대상의 치수를 바탕으로 포장재 커버 사이즈를 산출합니다.",
-      "category": "Engineering",
-      "icon": "📦",
-      "keywords": "포장재, 커버, 사이즈, 치수",
-      "version": "1.1",
-      "updated": "2026-11-14",
-      "changes": "입력 예시를 mm 기준으로 정리, 숫자 천 단위 구분 표시, 추천 치수 탐색 정밀도 개선 및 전체 비율 비교 추천 추가",
-      "history": [
-        {
-          "version": "1.1",
-          "date": "2026-11-14",
-          "changes": [
-            "입력 예시를 mm 기준으로 정리",
-            "숫자 천 단위 구분 표시",
-            "추천 치수 탐색 정밀도 개선",
-            "전체 비율 비교 추천 추가"
-          ]
-        },
-        {
-          "version": "1.0",
-          "date": "2026-11-14",
-          "changes": [
-            "최초 통합 등록"
-          ]
-        }
-      ],
-      "badge": "update",
-      "badgeUntil": "2026-11-28",
-      "url": "App/pack_cover_calculator.html",
-      "file": "pack_cover_calculator.html"
-    },
-    {
       "id": "chock-liner-calculator-html",
       "title": "Chock Liner 가공값 계산기",
       "description": "Chock Liner 계측값 자동 계산, 가공 마진 적용 및 A4 가공값 출력",
@@ -184,7 +114,6 @@
           "date": "2026-11-18",
           "changes": [
             "iNote Web Apps 포털 최초 등록",
-            "주식회사 유현 표기 추가",
             "계측값 자동 계산 및 A4 PDF 출력 기능 제공"
           ]
         }
@@ -245,6 +174,76 @@
       "badgeUntil": "",
       "url": "App/unit_converter.html",
       "file": "unit_converter.html"
+    },
+    {
+      "id": "triangle-solver-html",
+      "title": "삼각형 계산기",
+      "description": "변과 각을 이용해 삼각형의 길이, 각도, 둘레와 넓이를 계산합니다.",
+      "category": "Utility",
+      "icon": "📐",
+      "keywords": "삼각형, 삼각함수, 변, 각도, 넓이",
+      "version": "1.1",
+      "updated": "2026-11-14",
+      "changes": "PNG 저장 기능 제거, 정삼각형 구성도 및 각도·변 표시 정렬 개선, 각도 숫자 표시 제거, 꼭짓점 C 라벨 간격 조정, 구성도 하단 안내 문구 제거, 상단 단위 토글을 별도 행으로 배치",
+      "history": [
+        {
+          "version": "1.1",
+          "date": "2026-11-14",
+          "changes": [
+            "PNG 저장 기능 제거",
+            "정삼각형 구성도 및 각도·변 표시 정렬 개선",
+            "각도 숫자 표시 제거",
+            "꼭짓점 C 라벨 간격 조정",
+            "구성도 하단 안내 문구 제거",
+            "상단 단위 토글을 별도 행으로 배치"
+          ]
+        },
+        {
+          "version": "1.0",
+          "date": "최초 등록",
+          "changes": [
+            "최초 통합 등록"
+          ]
+        }
+      ],
+      "badge": "update",
+      "badgeUntil": "2026-11-28",
+      "url": "App/triangle_solver.html",
+      "file": "triangle_solver.html"
+    },
+    {
+      "id": "pack-cover-calculator-html",
+      "title": "포장재 커버 사이즈 계산기",
+      "description": "포장 대상의 치수를 바탕으로 포장재 커버 사이즈를 산출합니다.",
+      "category": "Utility",
+      "icon": "📦",
+      "keywords": "포장재, 커버, 사이즈, 치수",
+      "version": "1.1",
+      "updated": "2026-11-14",
+      "changes": "입력 예시를 mm 기준으로 정리, 숫자 천 단위 구분 표시, 추천 치수 탐색 정밀도 개선 및 전체 비율 비교 추천 추가",
+      "history": [
+        {
+          "version": "1.1",
+          "date": "2026-11-14",
+          "changes": [
+            "입력 예시를 mm 기준으로 정리",
+            "숫자 천 단위 구분 표시",
+            "추천 치수 탐색 정밀도 개선",
+            "전체 비율 비교 추천 추가"
+          ]
+        },
+        {
+          "version": "1.0",
+          "date": "2026-11-14",
+          "changes": [
+            "최초 통합 등록"
+          ]
+        }
+      ],
+      "badge": "update",
+      "badgeUntil": "2026-11-28",
+      "url": "App/pack_cover_calculator.html",
+      "file": "pack_cover_calculator.html"
     }
   ]
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "inote-webapps-v1.3.18";
+const CACHE_NAME = "inote-webapps-v1.3.19";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
